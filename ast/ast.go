@@ -25,7 +25,7 @@ type LetStatement struct {
 	Name *Indentifier
 	Value Expression
 }
-
+//method on the let statement 
 func(ls *LetStatement)statementNode(){}
 func(ls *LetStatement)TokenLiteral()string{ return ls.Token.Literal}
 
@@ -33,6 +33,9 @@ type Indentifier struct {
 	Token token.Token
 	Value string
 }
+//methods on the indentifier
+func(i *Indentifier)expressionNode(){}
+func (i *Indentifier)TokenLiteral()string { return i.Token.Literal}
 
 func(p *Program)TokenLiteral()string{
 	if len(p.Statements) > 0 {
