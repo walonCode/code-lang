@@ -29,6 +29,14 @@ type LetStatement struct {
 func(ls *LetStatement)statementNode(){}
 func(ls *LetStatement)TokenLiteral()string{ return ls.Token.Literal}
 
+type ReturnStatement struct {
+	Token token.Token
+	ReturnValue Expression
+}
+//methods on the return statement
+func(i *ReturnStatement)statementNode(){}
+func (i *ReturnStatement)TokenLiteral()string { return i.Token.Literal}
+
 type Indentifier struct {
 	Token token.Token
 	Value string
