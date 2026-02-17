@@ -8,15 +8,14 @@ import (
 	"github.com/walonCode/code-lang/repl"
 )
 
-
-func main(){
+func main() {
 	usr, err := user.Current()
 	if err != nil {
 		panic(err)
 	}
-	
+
 	fmt.Printf("Hello %s! This is the Code-Lang Programming Language\n", usr.Username)
 	fmt.Printf("Feel free to start type in the commands\n")
-	
+
 	repl.Start(os.Stdin, os.Stdout)
 }
