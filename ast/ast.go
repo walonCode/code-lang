@@ -27,7 +27,7 @@ type Program struct {
 
 type LetStatement struct {
 	Token token.Token
-	Name *Indentifier
+	Name *Identifier
 	Value Expression
 }
 //method on the let statement 
@@ -107,14 +107,14 @@ func (i *InfixExpression)String()string {
 }
 
 
-type Indentifier struct {
+type Identifier struct {
 	Token token.Token
 	Value string
 }
-//methods on the indentifier
-func(i *Indentifier)expressionNode(){}
-func (i *Indentifier)TokenLiteral()string { return i.Token.Literal}
-func (i *Indentifier)String()string { return i.Value}
+//methods on the Identifier
+func(i *Identifier)expressionNode(){}
+func (i *Identifier)TokenLiteral()string { return i.Token.Literal}
+func (i *Identifier)String()string { return i.Value}
 
 type IntergerLiteral struct {
 	Token token.Token
@@ -156,3 +156,13 @@ func (p *Program)String()string{
 	
 	return out.String()
 }
+
+//Boolean
+type Boolean struct {
+	Token token.Token
+	Value bool
+}
+
+func(b *Boolean)expressionNode(){}
+func(b *Boolean)TokenLiteral()string { return b.Token.Literal}
+func(b *Boolean)String()string { return b.Token.Literal }
