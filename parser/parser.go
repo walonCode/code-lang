@@ -91,6 +91,7 @@ func(p *Parser)parseStatement()ast.Statement{
 }
 
 func (p *Parser)parseExpressionStatement()*ast.ExpressionStatement{
+	defer untrace(trace("parseExpressionStatement"))
 	stmt := &ast.ExpressionStatement{Token: p.curToken}
 	stmt.Expression = p.parseExpression(LOWEST)
 	
@@ -102,6 +103,7 @@ func (p *Parser)parseExpressionStatement()*ast.ExpressionStatement{
 }
 
 func (p *Parser)parseIntergerLiteral()ast.Expression {
+	defer untrace(trace("parseIntergerLiteral"))
 	il := &ast.IntergerLiteral{Token:p.curToken}
 	
 	value, err := strconv.Atoi(p.curToken.Literal)
@@ -122,6 +124,7 @@ func(p *Parser)noPrefixParseError(t token.TokenType){
 }
 
 func(p *Parser)parseExpression(predence int)ast.Expression{
+	defer untrace(trace("parseExpression"))
 	prefix := p.prefixParseFns[p.curToken.Type]
 	if prefix == nil {
 		p.noPrefixParseError(p.curToken.Type)
@@ -161,7 +164,7 @@ func (p *Parser)parseLetStatement()*ast.LetStatement{
 		return nil
 	}
 	
-	stmt.Name = &ast.Indentifier{Token: p.curToken, Value: p.curToken.Literal}
+	stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 	
 	if !p.expectPeek(token.ASSIGN){
 		return nil
@@ -248,6 +251,7 @@ func New(l *lexer.Lexer)*Parser {
 }
 
 func(p *Parser)parseInfixExpression(left ast.Expression)ast.Expression{
+	defer untrace(trace("parseInfixExpression"))
 	expression := &ast.InfixExpression{
 		Token: p.curToken,
 		Operator: p.curToken.Literal,
@@ -262,6 +266,7 @@ func(p *Parser)parseInfixExpression(left ast.Expression)ast.Expression{
 }
 
 func(p *Parser)parsePrefixExpression()ast.Expression{
+	defer untrace(trace("parsePrefixExpression"))
 	expression := &ast.PrefixExpression{
 		Token: p.curToken,
 		Operator: p.curToken.Literal,
@@ -275,5 +280,5 @@ func(p *Parser)parsePrefixExpression()ast.Expression{
 }
 
 func (p *Parser)parseIdentifier()ast.Expression{
-	return &ast.Indentifier{Token: p.curToken, Value: p.curToken.Literal}
+	return &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 }
