@@ -15,16 +15,18 @@ func TestNextToken(t *testing.T){
 	};
 	
 	let result = add(five, ten);
-	!-/*5
+	!-/*5;
 	5 < 10 > 5;
 	
 	if (5 < 10){
 		return true;
 	}else {
 		return false;
-	}
+	};
 	10 == 10;
 	10 != 9;
+	10 >= 9;
+	10 <= 9;
 	`
 	
 	test := []struct{
@@ -72,6 +74,7 @@ func TestNextToken(t *testing.T){
 		{token.SLASH, "/"},
 		{token.ASTERISK, "*"},
 		{token.INT, "5"},
+		{token.SEMICOLON, ";"},
 		{token.INT, "5"},
 		{token.LT, "<"},
 		{token.INT, "10"},
@@ -95,12 +98,21 @@ func TestNextToken(t *testing.T){
 		{token.FALSE, "false"},
 		{token.SEMICOLON, ";"},
 		{token.RBRACE, "}"},
+		{token.SEMICOLON, ";"},
 		{token.INT, "10"},
 		{token.EQ, "=="},
 		{token.INT, "10"},
 		{token.SEMICOLON, ";"},
 		{token.INT, "10"},
 		{token.NOT_EQ, "!="},
+		{token.INT, "9"},
+		{token.SEMICOLON, ";"},
+		{token.INT, "10"},
+		{token.GREATER_THAN_EQUAL, ">="},
+		{token.INT, "9"},
+		{token.SEMICOLON, ";"},
+		{token.INT, "10"},
+		{token.LESS_THAN_EQUAL, "<="},
 		{token.INT, "9"},
 		{token.SEMICOLON, ";"},
 		{token.EOF, ""},
@@ -110,7 +122,7 @@ func TestNextToken(t *testing.T){
 	
 	for i, tt := range test {
 		tok := l.NextToken()
-		
+		println(tok.Type, tt.expectedType)
 		if tok.Type != tt.expectedType{
 			t.Fatalf("tests[%d] - tokentype wrong. expected=%v, got=%v",
 				i, tt.expectedType,tok.Type)

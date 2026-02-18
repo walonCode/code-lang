@@ -64,9 +64,21 @@ func(l *Lexer)NextToken()token.Token{
 		case '*':
 			tok = newToken(token.ASTERISK, l.ch)
 		case '<':
-			tok = newToken(token.LT, l.ch)
+			if l.peakChar() == '='{
+				ch := l.ch
+				l.readChar()
+				tok = token.Token{Type: token.LESS_THAN_EQUAL, Literal: string(ch)+string(l.ch)}
+			}else {
+				tok = newToken(token.LT, l.ch)
+			}
 		case '>':
-			tok = newToken(token.GT, l.ch)
+			if l.peakChar() == '='{
+				ch := l.ch
+				l.readChar()
+				tok = token.Token{Type: token.GREATER_THAN_EQUAL, Literal: string(ch)+string(l.ch)}
+			}else{
+				tok = newToken(token.GT, l.ch)
+			}
 		case ';':
 			tok = newToken(token.SEMICOLON, l.ch)
 		case ',':
