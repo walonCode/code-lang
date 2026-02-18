@@ -22,6 +22,8 @@ const (
 	SLASH = "/"
 	LT = "<"
 	GT = ">"
+	GREATER_THAN_EQUAL = ">="
+	LESS_THAN_EQUAL = "<="
 	EQ = "=="
 	NOT_EQ = "!="
 	// Delimiters
