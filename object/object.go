@@ -26,6 +26,14 @@ const (
 	ARRAY_OBJ        = "ARRAY"
 )
 
+
+// this allows us only to have on Bolean object and Null object
+var (
+	NULL  = &Null{}
+	TRUE  = &Boolean{Value: true}
+	FALSE = &Boolean{Value: false}
+)
+
 type Object interface {
 	Type() ObjectType
 	Inspect() string
@@ -68,6 +76,10 @@ type Error struct {
 
 func (e *Error) Type() ObjectType { return ERROR_OBJ }
 func (e *Error) Inspect() string  { return "ERROR: " + e.Message }
+
+func NewError(format string, a ...any) *Error {
+	return &Error{Message: fmt.Sprintf(format, a...)}
+}
 
 // function object
 type Function struct {

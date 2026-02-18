@@ -1,18 +1,10 @@
 package evaluator
 
 import (
-	"fmt"
-
 	"github.com/walonCode/code-lang/ast"
 	"github.com/walonCode/code-lang/object"
 )
 
-// this allows us only to have on Bolean object and Null object
-var (
-	NULL  = &object.Null{}
-	TRUE  = &object.Boolean{Value: true}
-	FALSE = &object.Boolean{Value: false}
-)
 
 func Eval(node ast.Node, env *object.Environment) object.Object {
 	switch node := node.(type) {
@@ -107,7 +99,7 @@ func evalIndexExpression(left, index object.Object) object.Object {
 	case left.Type() == object.ARRAY_OBJ && index.Type() == object.INTEGER_OBJ:
 		return evalArrayIndexExpression(left, index)
 	default:
-		return newError("index operator not supported: %s", left.Type())
+		return object.NewError("index operator not supported: %s", left.Type())
 	}
 }
 
@@ -117,7 +109,7 @@ func evalArrayIndexExpression(left, index object.Object) object.Object {
 	max := int64(len(arrayObj.Elements) - 1)
 
 	if idx < 0 || idx > max {
-		return NULL
+		return object.NULL
 	}
 
 	return arrayObj.Elements[idx]
@@ -132,7 +124,7 @@ func applyFunction(fn object.Object, args []object.Object) object.Object {
 	case *object.Builtin:
 		return fn.Fn(args...)
 	default:
-		return newError("not a function: %s", fn.Type())
+		return object.NewError("not a function: %s", fn.Type())
 	}
 }
 
@@ -173,7 +165,7 @@ func evalIdentifier(node *ast.Identifier, env *object.Environment) object.Object
 	if builtin, ok := builtins[node.Value]; ok {
 		return builtin
 	}
-	return newError("identifier not found: %s", node.Value)
+	return object.NewError("identifier not found: %s", node.Value)
 }
 
 func evalProgram(program *ast.Program, env object.Environment) object.Object {
@@ -221,17 +213,17 @@ func evalIfExpression(node *ast.IfExpression, env object.Environment) object.Obj
 	} else if node.Alternative != nil {
 		return Eval(node.Alternative, &env)
 	} else {
-		return NULL
+		return object.NULL
 	}
 }
 
 func isTruthy(obj object.Object) bool {
 	switch obj {
-	case NULL:
+	case object.NULL:
 		return false
-	case TRUE:
+	case object.TRUE:
 		return true
-	case FALSE:
+	case object.FALSE:
 		return false
 	default:
 		return true
@@ -255,7 +247,7 @@ func evalInfixExpression(operator string, left, right object.Object) object.Obje
 	case isStringOrChar(left) && isStringOrChar(right):
 		return evalMixedStringOrCharInfixExpression(operator, left, right)
 	default:
-		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
+		return object.NewError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
 	}
 }
 
@@ -285,13 +277,13 @@ func evalFloatInfixExpression(operator string, left, right object.Object) object
 	case ">=":
 		return nativeBoolToBooleanObject(leftVal >= rightVal)
 	default:
-		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
+		return object.NewError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
 	}
 }
 
 func evalMixedStringOrCharInfixExpression(operator string, left, right object.Object) object.Object {
 	if operator != "+" {
-		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
+		return object.NewError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
 	}
 
 	leftVal := left.(*object.String).Value
@@ -307,13 +299,13 @@ func evalCharInfixExpression(operator string, left, right object.Object) object.
 	case "+":
 		return &object.String{Value: string(leftVal) + string(rightVal)}
 	default:
-		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
+		return object.NewError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
 	}
 }
 
 func evalStringInfixExpression(operator string, left, right object.Object) object.Object {
 	if operator != "+" {
-		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
+		return object.NewError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
 	}
 
 	leftVal := left.(*object.String).Value
@@ -348,7 +340,7 @@ func evalIntegerInfixExpression(operator string, left, right object.Object) obje
 	case ">=":
 		return nativeBoolToBooleanObject(leftVal >= rightVal)
 	default:
-		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
+		return object.NewError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
 	}
 }
 
@@ -359,13 +351,13 @@ func evalPrefixExpression(operator string, right object.Object) object.Object {
 	case "-":
 		return evalMinusOperatorExpression(right)
 	default:
-		return newError("unknown operator: %s%s", operator, right.Type())
+		return object.NewError("unknown operator: %s%s", operator, right.Type())
 	}
 }
 
 func evalMinusOperatorExpression(right object.Object) object.Object {
 	if right.Type() != object.INTEGER_OBJ {
-		return newError("unknown operator: -%s", right.Type())
+		return object.NewError("unknown operator: -%s", right.Type())
 	}
 
 	value := right.(*object.Integer).Value
@@ -374,27 +366,22 @@ func evalMinusOperatorExpression(right object.Object) object.Object {
 
 func evalBangOperatorExpression(right object.Object) object.Object {
 	switch right {
-	case TRUE:
-		return FALSE
-	case FALSE:
-		return TRUE
-	case NULL:
-		return TRUE
+	case object.TRUE:
+		return object.FALSE
+	case object.FALSE:
+		return object.TRUE
+	case object.NULL:
+		return object.TRUE
 	default:
-		return FALSE
+		return object.FALSE
 	}
 }
 
 func nativeBoolToBooleanObject(input bool) *object.Boolean {
 	if input {
-		return TRUE
+		return object.TRUE
 	}
-	return FALSE
-}
-
-// helper
-func newError(format string, a ...any) *object.Error {
-	return &object.Error{Message: fmt.Sprintf(format, a...)}
+	return object.FALSE
 }
 
 func isError(obj object.Object) bool {
