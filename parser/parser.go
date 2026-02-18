@@ -21,15 +21,17 @@ const (
 )
 
 var precendeces = map[token.TokenType]int{
-	token.EQ:       EQUALS,
-	token.NOT_EQ:   EQUALS,
-	token.LT:       LESSGREATER,
-	token.GT:       LESSGREATER,
-	token.PLUS:     SUM,
-	token.MINUS:    SUM,
-	token.SLASH:    PRODUCT,
-	token.ASTERISK: PRODUCT,
-	token.LPAREN:   CALL,
+	token.EQ:                 EQUALS,
+	token.NOT_EQ:             EQUALS,
+	token.LT:                 LESSGREATER,
+	token.GT:                 LESSGREATER,
+	token.GREATER_THAN_EQUAL: LESSGREATER,
+	token.LESS_THAN_EQUAL:    LESSGREATER,
+	token.PLUS:               SUM,
+	token.MINUS:              SUM,
+	token.SLASH:              PRODUCT,
+	token.ASTERISK:           PRODUCT,
+	token.LPAREN:             CALL,
 }
 
 func (p *Parser) peekPredences() int {
@@ -258,6 +260,8 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.NOT_EQ, p.parseInfixExpression)
 	p.registerInfix(token.LT, p.parseInfixExpression)
 	p.registerInfix(token.GT, p.parseInfixExpression)
+	p.registerInfix(token.GREATER_THAN_EQUAL, p.parseInfixExpression)
+	p.registerInfix(token.LESS_THAN_EQUAL, p.parseInfixExpression)
 	p.registerInfix(token.LPAREN, p.parseCallExpression)
 	return p
 }
