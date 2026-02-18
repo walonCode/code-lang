@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/walonCode/code-lang/evaluator"
 	"github.com/walonCode/code-lang/lexer"
 	"github.com/walonCode/code-lang/parser"
 )
@@ -33,8 +34,11 @@ func Start(in io.Reader, out io.Writer){
 			continue
 		}
 		
-		io.WriteString(out, programe.String())
-		io.WriteString(out, "\n")
+		evaluated := evaluator.Eval(programe)
+		if evaluated != nil {
+			io.WriteString(out, evaluated.Inspect())
+			io.WriteString(out, "\n")
+		}
 	}
 }
 
