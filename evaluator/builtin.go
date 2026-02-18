@@ -1,6 +1,10 @@
 package evaluator
 
-import "github.com/walonCode/code-lang/object"
+import (
+	"fmt"
+
+	"github.com/walonCode/code-lang/object"
+)
 
 var builtins = map[string]*object.Builtin{
 	"len":&object.Builtin{
@@ -15,6 +19,14 @@ var builtins = map[string]*object.Builtin{
 				default:
 					return newError("argument to `len` not supported, got %s", args[0].Type())
 			}
+		},
+	},
+	"print":&object.Builtin{
+		Fn: func(args ...object.Object) object.Object {
+			for _, value := range args {
+				fmt.Println(value.Inspect())
+			}
+			return nil
 		},
 	},
 }
