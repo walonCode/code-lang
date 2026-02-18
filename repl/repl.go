@@ -7,6 +7,7 @@ import (
 
 	"github.com/walonCode/code-lang/evaluator"
 	"github.com/walonCode/code-lang/lexer"
+	"github.com/walonCode/code-lang/object"
 	"github.com/walonCode/code-lang/parser"
 )
 
@@ -14,6 +15,7 @@ const PROMPT = ">> "
 
 func Start(in io.Reader, out io.Writer){
 	scanner := bufio.NewScanner(in)
+	env := object.NewEnvironment()
 	
 	for {
 		fmt.Printf(PROMPT)
@@ -34,7 +36,7 @@ func Start(in io.Reader, out io.Writer){
 			continue
 		}
 		
-		evaluated := evaluator.Eval(programe)
+		evaluated := evaluator.Eval(programe, env)
 		if evaluated != nil {
 			io.WriteString(out, evaluated.Inspect())
 			io.WriteString(out, "\n")
