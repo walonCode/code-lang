@@ -1,6 +1,10 @@
 package lexer
 
-import "github.com/walonCode/code-lang/token"
+import (
+	"strings"
+
+	"github.com/walonCode/code-lang/token"
+)
 
 type Lexer struct {
 	input string
@@ -86,6 +90,12 @@ func(l *Lexer)NextToken()token.Token{
 		case '"':
 			tok.Type = token.STRING
 			tok.Literal = l.readString()
+		case '\'':
+			tok.Type = token.CHAR
+			tok.Literal = l.readCharType()
+		case '.':
+			tok.Type = token.FLOAT
+			tok.Literal = l.readFloat()
 		case 0:
 			tok.Literal = ""
 			tok.Type = token.EOF
@@ -95,9 +105,13 @@ func(l *Lexer)NextToken()token.Token{
 				tok.Type = token.LookUpIdent(tok.Literal)
 				return tok
 			}else if isDigit(l.ch){
-				tok.Type = token.INT
 				tok.Literal = l.readNumber()
-				return tok
+				if strings.Contains(tok.Literal, "."){
+					tok.Type = token.FLOAT
+				}else{
+					tok.Type = token.INT
+				}
+				return tok	
 			}else {
 				tok = newToken(token.ILLEGAL, l.ch)
 			}
@@ -105,6 +119,22 @@ func(l *Lexer)NextToken()token.Token{
 	
 	l.readChar()
 	return tok
+}
+
+func(l *Lexer)readCharType()string{
+	l.readChar()
+	if l.ch == 0 || l.ch == '\'' {
+		return token.ILLEGAL
+	}
+
+	value := l.ch
+	l.readChar()
+	
+	if l.ch != '\'' {
+		l.readChar()
+		return token.ILLEGAL
+	}
+	return string(value)
 }
 
 func(l *Lexer)readString()string{
@@ -131,8 +161,27 @@ func (l *Lexer)readNumber()string{
 	for isDigit(l.ch){
 		l.readChar()
 	}
+	
+	if l.ch == '.'{
+		l.readChar()
+		for isDigit(l.ch){
+			l.readChar()
+		}
+	}
+
 	return l.input[position:l.position]
 }
+
+func (l *Lexer)readFloat()string{
+	position := l.position
+	l.readChar()
+	for isDigit(l.ch){
+		l.readChar()
+	}
+
+	return l.input[position:l.position]
+}
+
 
 func (l *Lexer)skipWhiteSpace(){
 	for l.ch == ' ' || l.ch == '\t' || l.ch == '\n' || l.ch == '\r' {

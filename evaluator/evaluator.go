@@ -37,8 +37,12 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 	//expression
 	case *ast.IntegerLiteral:
 		return &object.Integer{Value: node.Value}
+	case *ast.FloatLiteral:
+		return &object.Float{ Value: node.Value}
 	case *ast.StringLiteral:
 		return &object.String{Value: node.Value}
+	case *ast.CharLiteral:
+		return &object.Char{ Value: node.Value }
 	case *ast.Boolean:
 		return nativeBoolToBooleanObject(node.Value)
 	case *ast.PrefixExpression:
@@ -198,17 +202,73 @@ func evalInfixExpression(operator string, left, right object.Object) object.Obje
 	switch {
 	case left.Type() == object.INTEGER_OBJ && right.Type() == object.INTEGER_OBJ:
 		return evalIntegerInfixExpression(operator, left, right)
+	case left.Type() == object.FLOAT_OBJ && right.Type() == object.FLOAT_OBJ:
+		return evalFloatInfixExpression(operator, left, right)
 	case operator == "==":
 		return nativeBoolToBooleanObject(left == right)
 	case operator == "!=":
 		return nativeBoolToBooleanObject(left != right)
-	case left.Type() != right.Type():
-		return newError("type mismatch: %s %s %s", left.Type(), operator, right.Type())
 	case left.Type() == object.STRING_OBJ && right.Type() == object.STRING_OBJ:
 		return evalStringInfixExpression(operator, left, right)
+	case left.Type() == object.CHAR_OBJ && right.Type() == object.CHAR_OBJ:
+		return evalCharInfixExpression(operator, left, right)
+	case isStringOrChar(left) && isStringOrChar(right):
+		return evalMixedStringOrCharInfixExpression(operator, left, right)
 	default:
 		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
 	}
+}
+
+func evalFloatInfixExpression(operator string, left,right object.Object)object.Object{
+	leftVal := left.(*object.Float).Value
+	rightVal := right.(*object.Float).Value
+
+	switch operator {
+	case "+":
+		return &object.Float{Value: leftVal + rightVal}
+	case "-":
+		return &object.Float{Value: leftVal - rightVal}
+	case "*":
+		return &object.Float{Value: leftVal * rightVal}
+	case "/":
+		return &object.Float{Value: leftVal / rightVal}
+	case "<":
+		return nativeBoolToBooleanObject(leftVal < rightVal)
+	case ">":
+		return nativeBoolToBooleanObject(leftVal > rightVal)
+	case "==":
+		return nativeBoolToBooleanObject(leftVal == rightVal)
+	case "!=":
+		return nativeBoolToBooleanObject(leftVal != rightVal)
+	case "<=":
+		return nativeBoolToBooleanObject(leftVal <= rightVal)
+	case ">=":
+		return nativeBoolToBooleanObject(leftVal >= rightVal)
+	default:
+		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
+	}
+}
+
+func evalMixedStringOrCharInfixExpression(operator string, left, right object.Object)object.Object{
+	if operator != "+"{
+		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
+	}
+	
+	leftVal := left.(*object.String).Value
+	rightVal := right.(*object.Char).Value
+	
+	return &object.String{Value: leftVal + string(rightVal)}
+}
+
+func evalCharInfixExpression(operator string, left, right object.Object)object.Object{
+	leftVal := left.(*object.Char).Value
+	rightVal := right.(*object.Char).Value
+	switch operator {
+		case "+":
+			return &object.String{Value: string(leftVal) + string(rightVal)}
+		default:
+			return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
+	}	
 }
 
 func evalStringInfixExpression(operator string, left,right object.Object)object.Object{
@@ -302,4 +362,8 @@ func isError(obj object.Object) bool {
 		return obj.Type() == object.ERROR_OBJ
 	}
 	return false
+}
+
+func isStringOrChar(obj object.Object) bool{
+	return obj.Type() == object.STRING_OBJ || obj.Type() == object.CHAR_OBJ
 }

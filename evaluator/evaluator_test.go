@@ -334,3 +334,17 @@ func TestStringConcatenation(t *testing.T) {
 		t.Errorf("String has wrong value. got=%q", str.Value)
 	}
 }
+
+func TestCharLiteral(t *testing.T){
+	input := `'b';`
+	evaluted := testEval(input)
+	
+	char, ok := evaluted.(*object.Char)
+	if !ok {
+		t.Fatalf("object is not a Char. got=%T (%+v)", evaluted, evaluted)
+	}
+	
+	if char.Value != 'b' {
+		t.Errorf("Char has the wrong value. got=%q", char.Value)
+	}
+}

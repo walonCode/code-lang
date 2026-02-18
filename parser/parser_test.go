@@ -779,3 +779,35 @@ func TestStringLiteralExpression(t *testing.T) {
 		t.Errorf("literal.Value not %q. got=%q", "hello world", literal.Value)
 	}
 }
+
+func TestCharLiteralExpression(t *testing.T) {
+	input := `'a';`
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParsePrograme()
+	checkParserErrors(t, p)
+	stmt := program.Statements[0].(*ast.ExpressionStatement)
+	literal, ok := stmt.Expression.(*ast.CharLiteral)
+	if !ok {
+		t.Fatalf("exp not *ast.CharLiteral. got=%T", stmt.Expression)
+	}
+	if literal.Value != 'a' {
+		t.Errorf("literal.Value not %q. got=%q", 'a', literal.Value)
+	}
+}
+
+func TestFloatLiteralExpression(t *testing.T) {
+	input := `3.14;`
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParsePrograme()
+	checkParserErrors(t, p)
+	stmt := program.Statements[0].(*ast.ExpressionStatement)
+	literal, ok := stmt.Expression.(*ast.FloatLiteral)
+	if !ok {
+		t.Fatalf("exp not *ast.FloatLiteral. got=%T", stmt.Expression)
+	}
+	if literal.Value != 3.14 {
+		t.Errorf("literal.Value not %f. got=%f", 3.14, literal.Value)
+	}
+}

@@ -19,6 +19,8 @@ const (
 	ERROR_OBJ        = "ERROR"
 	FUNCTION_OBJ     = "FUNCTION"
 	STRING_OBJ = "STRING"
+	CHAR_OBJ = "CHAR"
+	FLOAT_OBJ = "FLOAT"
 )
 
 type Object interface {
@@ -94,6 +96,19 @@ type String struct {
 func (s *String) Type() ObjectType { return STRING_OBJ }
 func (s *String) Inspect() string { return s.Value }
 
+//char obj
+type Char struct {
+	Value rune
+}
+func (s *Char) Type() ObjectType { return CHAR_OBJ }
+func (s *Char) Inspect() string { return string(s.Value) }
+
+//float obj
+type Float struct {
+	Value float64
+}
+func (s *Float) Type() ObjectType { return FLOAT_OBJ }
+func (s *Float) Inspect() string { return fmt.Sprintf("%f",s.Value)}
 
 // Environment
 func NewEnclosedEnvironment(outer *Environment)*Environment{

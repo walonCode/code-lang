@@ -104,8 +104,22 @@ func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 	return stmt
 }
 
-func (p *Parser) parseIntergerLiteral() ast.Expression {
-	// defer untrace(trace("parseIntergerLiteral"))
+func(p *Parser) parseFloatLiteral()ast.Expression{
+	exp := &ast.FloatLiteral{Token: p.curToken}
+	
+	value, err := strconv.ParseFloat(p.curToken.Literal, 64)
+	if err != nil {
+		msg := fmt.Sprintf("could not parse %q as float", p.curToken.Literal)
+		p.errors = append(p.errors, msg)
+		return nil
+	}
+	
+	exp.Value = value
+	return exp
+}
+
+func (p *Parser) parseIntegerLiteral() ast.Expression {
+	// defer untrace(trace("parseIntegerLiteral"))
 	il := &ast.IntegerLiteral{Token: p.curToken}
 
 	value, err := strconv.Atoi(p.curToken.Literal)
@@ -241,7 +255,7 @@ func New(l *lexer.Lexer) *Parser {
 	//prefix
 	p.prefixParseFns = make(map[token.TokenType]prefixParseFn)
 	p.registerPrefix(token.IDENT, p.parseIdentifier)
-	p.registerPrefix(token.INT, p.parseIntergerLiteral)
+	p.registerPrefix(token.INT, p.parseIntegerLiteral)
 	p.registerPrefix(token.BANG, p.parsePrefixExpression)
 	p.registerPrefix(token.MINUS, p.parsePrefixExpression)
 	p.registerPrefix(token.FALSE, p.parseBoolean)
@@ -250,6 +264,8 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.IF, p.parseIfExpression)
 	p.registerPrefix(token.FUNCTION, p.parseFunctionLiteral)
 	p.registerPrefix(token.STRING, p.parseStringLiteral)
+	p.registerPrefix(token.CHAR, p.parseCharLiteral)
+	p.registerPrefix(token.FLOAT, p.parseFloatLiteral)
 
 	//infix
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
@@ -269,6 +285,10 @@ func New(l *lexer.Lexer) *Parser {
 
 func(p *Parser)parseStringLiteral()ast.Expression{
 	return &ast.StringLiteral{Token: p.curToken, Value: p.curToken.Literal}
+}
+
+func(p *Parser)parseCharLiteral()ast.Expression{
+	return &ast.CharLiteral{Token: p.curToken, Value: rune(p.curToken.Literal[0])}
 }
 
 func (p *Parser) parseCallExpression(function ast.Expression) ast.Expression {
