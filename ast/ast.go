@@ -23,41 +23,43 @@ type Expression interface {
 }
 
 type Program struct {
-	Statements []Statement 
+	Statements []Statement
 }
 
 type LetStatement struct {
 	Token token.Token
-	Name *Identifier
+	Name  *Identifier
 	Value Expression
 }
-//method on the let statement 
-func(ls *LetStatement)statementNode(){}
-func(ls *LetStatement)TokenLiteral()string{ return ls.Token.Literal}
-func(ls *LetStatement)String()string{
+
+// method on the let statement
+func (ls *LetStatement) statementNode()       {}
+func (ls *LetStatement) TokenLiteral() string { return ls.Token.Literal }
+func (ls *LetStatement) String() string {
 	var out bytes.Buffer
-	
+
 	out.WriteString(ls.TokenLiteral() + " ")
 	out.WriteString(ls.Name.String())
 	out.WriteString(" = ")
-	
+
 	if ls.Value != nil {
 		out.WriteString(ls.Value.String())
 	}
-	
+
 	out.WriteString(";")
-	
+
 	return out.String()
 }
 
 type ReturnStatement struct {
-	Token token.Token
+	Token       token.Token
 	ReturnValue Expression
 }
-//methods on the return statement
-func(i *ReturnStatement)statementNode(){}
-func (i *ReturnStatement)TokenLiteral()string { return i.Token.Literal}
-func(i *ReturnStatement)String()string{
+
+// methods on the return statement
+func (i *ReturnStatement) statementNode()       {}
+func (i *ReturnStatement) TokenLiteral() string { return i.Token.Literal }
+func (i *ReturnStatement) String() string {
 	var out bytes.Buffer
 	out.WriteString(i.TokenLiteral() + " ")
 	if i.ReturnValue != nil {
@@ -68,157 +70,163 @@ func(i *ReturnStatement)String()string{
 }
 
 type PrefixExpression struct {
-	Token token.Token
+	Token    token.Token
 	Operator string
-	Right Expression
+	Right    Expression
 }
-//methods on prefix expression
-func(i *PrefixExpression)expressionNode(){}
-func (i *PrefixExpression)TokenLiteral()string { return i.Token.Literal}
-func (i *PrefixExpression)String()string {
+
+// methods on prefix expression
+func (i *PrefixExpression) expressionNode()      {}
+func (i *PrefixExpression) TokenLiteral() string { return i.Token.Literal }
+func (i *PrefixExpression) String() string {
 	var out bytes.Buffer
-	
+
 	out.WriteString("(")
 	out.WriteString(i.Operator)
 	out.WriteString(i.Right.String())
 	out.WriteString(")")
-	
+
 	return out.String()
 }
 
 type InfixExpression struct {
-	Token token.Token
-	Left Expression
-	Right Expression
+	Token    token.Token
+	Left     Expression
+	Right    Expression
 	Operator string
 }
-//method on infix expression
-func(i *InfixExpression)expressionNode(){}
-func (i *InfixExpression)TokenLiteral()string { return i.Token.Literal}
-func (i *InfixExpression)String()string {
+
+// method on infix expression
+func (i *InfixExpression) expressionNode()      {}
+func (i *InfixExpression) TokenLiteral() string { return i.Token.Literal }
+func (i *InfixExpression) String() string {
 	var out bytes.Buffer
-	
+
 	out.WriteString("(")
 	out.WriteString(i.Left.String())
 	out.WriteString(" " + i.Operator + " ")
 	out.WriteString(i.Right.String())
 	out.WriteString(")")
-	
+
 	return out.String()
 }
-
 
 type Identifier struct {
 	Token token.Token
 	Value string
 }
-//methods on the Identifier
-func(i *Identifier)expressionNode(){}
-func (i *Identifier)TokenLiteral()string { return i.Token.Literal}
-func (i *Identifier)String()string { return i.Value}
+
+// methods on the Identifier
+func (i *Identifier) expressionNode()      {}
+func (i *Identifier) TokenLiteral() string { return i.Token.Literal }
+func (i *Identifier) String() string       { return i.Value }
 
 type IntegerLiteral struct {
 	Token token.Token
 	Value int64
 }
-//methods on Interger Literal
-func(i *IntegerLiteral)expressionNode(){}
-func (i *IntegerLiteral)TokenLiteral()string { return i.Token.Literal}
-func (i *IntegerLiteral)String()string { return i.Token.Literal}
+
+// methods on Interger Literal
+func (i *IntegerLiteral) expressionNode()      {}
+func (i *IntegerLiteral) TokenLiteral() string { return i.Token.Literal }
+func (i *IntegerLiteral) String() string       { return i.Token.Literal }
 
 type ExpressionStatement struct {
-	Token token.Token
+	Token      token.Token
 	Expression Expression
 }
-//method on the expression statement
-func(i *ExpressionStatement)statementNode(){}
-func(i *ExpressionStatement)TokenLiteral()string { return i.Token.Literal }
-func(i *ExpressionStatement)String()string{
+
+// method on the expression statement
+func (i *ExpressionStatement) statementNode()       {}
+func (i *ExpressionStatement) TokenLiteral() string { return i.Token.Literal }
+func (i *ExpressionStatement) String() string {
 	if i.Expression != nil {
 		return i.Expression.String()
 	}
 	return ""
 }
 
-func(p *Program)TokenLiteral()string{
+func (p *Program) TokenLiteral() string {
 	if len(p.Statements) > 0 {
 		return p.Statements[0].TokenLiteral()
-	}else{
+	} else {
 		return ""
 	}
 }
 
-func (p *Program)String()string{
+func (p *Program) String() string {
 	var out bytes.Buffer
-	
+
 	for _, s := range p.Statements {
 		out.WriteString(s.String())
 	}
-	
+
 	return out.String()
 }
 
-//Boolean
+// Boolean
 type Boolean struct {
 	Token token.Token
 	Value bool
 }
 
-func(b *Boolean)expressionNode(){}
-func(b *Boolean)TokenLiteral()string { return b.Token.Literal}
-func(b *Boolean)String()string { return b.Token.Literal }
+func (b *Boolean) expressionNode()      {}
+func (b *Boolean) TokenLiteral() string { return b.Token.Literal }
+func (b *Boolean) String() string       { return b.Token.Literal }
 
-
-//if expression
+// if expression
 type IfExpression struct {
-	Token token.Token
-	Condition Expression
+	Token       token.Token
+	Condition   Expression
 	Consequence *BlockStatement
 	Alternative *BlockStatement
 }
-//methods on the if expression
-func(i *IfExpression)expressionNode(){}
-func(i *IfExpression)TokenLiteral()string { return i.Token.Literal}
-func(i *IfExpression)String()string { 
+
+// methods on the if expression
+func (i *IfExpression) expressionNode()      {}
+func (i *IfExpression) TokenLiteral() string { return i.Token.Literal }
+func (i *IfExpression) String() string {
 	var out bytes.Buffer
-	
+
 	out.WriteString("if")
 	out.WriteString(i.Condition.String())
 	out.WriteString(" ")
 	out.WriteString(i.Consequence.String())
-	
+
 	if i.Alternative != nil {
 		out.WriteString("else")
 		out.WriteString(i.Alternative.String())
 	}
-	
+
 	return out.String()
 }
 
 type BlockStatement struct {
-	Token token.Token
+	Token      token.Token
 	Statements []Statement
 }
-//method on the block statement
-func (bs *BlockStatement) statementNode() {}
+
+// method on the block statement
+func (bs *BlockStatement) statementNode()       {}
 func (bs *BlockStatement) TokenLiteral() string { return bs.Token.Literal }
 func (bs *BlockStatement) String() string {
 	var out bytes.Buffer
 	for _, s := range bs.Statements {
 		out.WriteString(s.String())
 	}
-	
+
 	return out.String()
 }
 
-//function
+// function
 type FunctionLiteral struct {
-	Token token.Token
+	Token      token.Token
 	Parameters []*Identifier
-	Body BlockStatement
+	Body       BlockStatement
 }
-//method on the function literal
-func (fl *FunctionLiteral) expressionNode() {}
+
+// method on the function literal
+func (fl *FunctionLiteral) expressionNode()      {}
 func (fl *FunctionLiteral) TokenLiteral() string { return fl.Token.Literal }
 func (fl *FunctionLiteral) String() string {
 	var out bytes.Buffer
@@ -234,14 +242,15 @@ func (fl *FunctionLiteral) String() string {
 	return out.String()
 }
 
-//call expression
+// call expression
 type CallExpression struct {
-	Token token.Token
-	Function Expression
+	Token     token.Token
+	Function  Expression
 	Arguments []Expression
 }
-//methods on the call expression
-func (ce *CallExpression) expressionNode() {}
+
+// methods on the call expression
+func (ce *CallExpression) expressionNode()      {}
 func (ce *CallExpression) TokenLiteral() string { return ce.Token.Literal }
 func (ce *CallExpression) String() string {
 	var out bytes.Buffer
@@ -256,30 +265,74 @@ func (ce *CallExpression) String() string {
 	return out.String()
 }
 
-//strings
+// strings
 type StringLiteral struct {
 	Token token.Token
 	Value string
 }
-//method on string 
-func (sl *StringLiteral) expressionNode() {}
-func (sl *StringLiteral) TokenLiteral() string { return sl.Token.Literal }
-func (sl *StringLiteral) String() string { return sl.Token.Literal }
 
-//char
+// method on string
+func (sl *StringLiteral) expressionNode()      {}
+func (sl *StringLiteral) TokenLiteral() string { return sl.Token.Literal }
+func (sl *StringLiteral) String() string       { return sl.Token.Literal }
+
+// char
 type CharLiteral struct {
 	Token token.Token
 	Value rune
 }
-func (sl *CharLiteral) expressionNode() {}
-func (sl *CharLiteral) TokenLiteral() string { return sl.Token.Literal }
-func (sl *CharLiteral) String() string { return sl.Token.Literal }
 
-//float
+func (sl *CharLiteral) expressionNode()      {}
+func (sl *CharLiteral) TokenLiteral() string { return sl.Token.Literal }
+func (sl *CharLiteral) String() string       { return sl.Token.Literal }
+
+// float
 type FloatLiteral struct {
 	Token token.Token
 	Value float64
 }
-func (sl *FloatLiteral) expressionNode() {}
+
+func (sl *FloatLiteral) expressionNode()      {}
 func (sl *FloatLiteral) TokenLiteral() string { return sl.Token.Literal }
-func (sl *FloatLiteral) String() string { return sl.Token.Literal }
+func (sl *FloatLiteral) String() string       { return sl.Token.Literal }
+
+// array
+type ArrayLiteral struct {
+	Token    token.Token
+	Elements []Expression
+}
+
+// method on Array literal
+func (al *ArrayLiteral) expressionNode()      {}
+func (al *ArrayLiteral) TokenLiteral() string { return al.Token.Literal }
+func (al *ArrayLiteral) String() string {
+	var out bytes.Buffer
+	elements := []string{}
+	for _, el := range al.Elements {
+		elements = append(elements, el.String())
+	}
+	out.WriteString("[")
+	out.WriteString(strings.Join(elements, ", "))
+	out.WriteString("]")
+	return out.String()
+}
+
+// array index expression
+type IndexExpression struct {
+	Token token.Token //[
+	Left  Expression
+	Index Expression
+}
+
+// method on array index
+func (ie *IndexExpression) expressionNode()      {}
+func (ie *IndexExpression) TokenLiteral() string { return ie.Token.Literal }
+func (ie *IndexExpression) String() string {
+	var out bytes.Buffer
+	out.WriteString("(")
+	out.WriteString(ie.Left.String())
+	out.WriteString("[")
+	out.WriteString(ie.Index.String())
+	out.WriteString("])")
+	return out.String()
+}

@@ -36,6 +36,7 @@ func TestNextToken(t *testing.T){
 	5.6
 	.555
 	.5
+	[1,2];
 	`
 	
 	test := []struct{
@@ -133,6 +134,12 @@ func TestNextToken(t *testing.T){
 		{token.FLOAT, "5.6"},
 		{token.FLOAT, ".555"},
 		{token.FLOAT, ".5"},
+		{token.LBRACKET, "["},
+		{token.INT, "1"},
+		{token.COMMA, ","},
+		{token.INT, "2"},
+		{token.RBRACKET, "]"},
+		{token.SEMICOLON, ";"},
 		{token.EOF, ""},
 	}
 	

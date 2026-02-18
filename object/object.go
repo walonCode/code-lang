@@ -8,7 +8,7 @@ import (
 	"github.com/walonCode/code-lang/ast"
 )
 
-type BuiltinFunction func(args ...Object)Object
+type BuiltinFunction func(args ...Object) Object
 type ObjectType string
 
 // constant for each object type
@@ -19,10 +19,11 @@ const (
 	RETURN_VALUE_OBJ = "RETURN_VALUE"
 	ERROR_OBJ        = "ERROR"
 	FUNCTION_OBJ     = "FUNCTION"
-	STRING_OBJ = "STRING"
-	CHAR_OBJ = "CHAR"
-	FLOAT_OBJ = "FLOAT"
-	BUILTIN_OBJ = "BUILTIN"
+	STRING_OBJ       = "STRING"
+	CHAR_OBJ         = "CHAR"
+	FLOAT_OBJ        = "FLOAT"
+	BUILTIN_OBJ      = "BUILTIN"
+	ARRAY_OBJ        = "ARRAY"
 )
 
 type Object interface {
@@ -91,39 +92,61 @@ func (f *Function) Inspect() string {
 	return out.String()
 }
 
-//sttring obj
+// sttring obj
 type String struct {
 	Value string
 }
-func (s *String) Type() ObjectType { return STRING_OBJ }
-func (s *String) Inspect() string { return s.Value }
 
-//char obj
+func (s *String) Type() ObjectType { return STRING_OBJ }
+func (s *String) Inspect() string  { return s.Value }
+
+// char obj
 type Char struct {
 	Value rune
 }
-func (s *Char) Type() ObjectType { return CHAR_OBJ }
-func (s *Char) Inspect() string { return string(s.Value) }
 
-//float obj
+func (s *Char) Type() ObjectType { return CHAR_OBJ }
+func (s *Char) Inspect() string  { return string(s.Value) }
+
+// float obj
 type Float struct {
 	Value float64
 }
-func (s *Float) Type() ObjectType { return FLOAT_OBJ }
-func (s *Float) Inspect() string { return fmt.Sprintf("%f",s.Value)}
 
-//builtin obj
+func (s *Float) Type() ObjectType { return FLOAT_OBJ }
+func (s *Float) Inspect() string  { return fmt.Sprintf("%f", s.Value) }
+
+// builtin obj
 type Builtin struct {
 	Fn BuiltinFunction
 }
+
 func (b *Builtin) Type() ObjectType { return BUILTIN_OBJ }
-func (b *Builtin) Inspect() string { return "builtin function" }
+func (b *Builtin) Inspect() string  { return "builtin function" }
+
+// array obj
+type Array struct {
+	Elements []Object
+}
+
+func (ao *Array) Type() ObjectType { return ARRAY_OBJ }
+func (ao *Array) Inspect() string {
+	var out bytes.Buffer
+	elements := []string{}
+	for _, e := range ao.Elements {
+		elements = append(elements, e.Inspect())
+	}
+	out.WriteString("[")
+	out.WriteString(strings.Join(elements, ", "))
+	out.WriteString("]")
+	return out.String()
+}
 
 // Environment
-func NewEnclosedEnvironment(outer *Environment)*Environment{
+func NewEnclosedEnvironment(outer *Environment) *Environment {
 	env := NewEnvironment()
 	env.outer = outer
-	
+
 	return env
 }
 
@@ -140,7 +163,7 @@ type Environment struct {
 func (e *Environment) Get(name string) (Object, bool) {
 	obj, ok := e.store[name]
 	if !ok && e.outer != nil {
-		obj,ok = e.outer.Get(name)
+		obj, ok = e.outer.Get(name)
 	}
 	return obj, ok
 }
