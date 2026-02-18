@@ -8,6 +8,7 @@ import (
 	"github.com/walonCode/code-lang/ast"
 )
 
+type BuiltinFunction func(args ...Object)Object
 type ObjectType string
 
 // constant for each object type
@@ -21,6 +22,7 @@ const (
 	STRING_OBJ = "STRING"
 	CHAR_OBJ = "CHAR"
 	FLOAT_OBJ = "FLOAT"
+	BUILTIN_OBJ = "BUILTIN"
 )
 
 type Object interface {
@@ -109,6 +111,13 @@ type Float struct {
 }
 func (s *Float) Type() ObjectType { return FLOAT_OBJ }
 func (s *Float) Inspect() string { return fmt.Sprintf("%f",s.Value)}
+
+//builtin obj
+type Builtin struct {
+	Fn BuiltinFunction
+}
+func (b *Builtin) Type() ObjectType { return BUILTIN_OBJ }
+func (b *Builtin) Inspect() string { return "builtin function" }
 
 // Environment
 func NewEnclosedEnvironment(outer *Environment)*Environment{

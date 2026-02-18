@@ -14,6 +14,14 @@ var (
 	FALSE = &object.Boolean{Value: false}
 )
 
+// var builtins = map[string]*object.Builtin{
+// 	"len": &object.Builtin{
+// 		Fn: func(args ...object.Object) object.Object {
+// 			return NULL
+// 		},
+// 	},
+// }
+
 func Eval(node ast.Node, env *object.Environment) object.Object {
 	switch node := node.(type) {
 	//statement
@@ -38,11 +46,11 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 	case *ast.IntegerLiteral:
 		return &object.Integer{Value: node.Value}
 	case *ast.FloatLiteral:
-		return &object.Float{ Value: node.Value}
+		return &object.Float{Value: node.Value}
 	case *ast.StringLiteral:
 		return &object.String{Value: node.Value}
 	case *ast.CharLiteral:
-		return &object.Char{ Value: node.Value }
+		return &object.Char{Value: node.Value}
 	case *ast.Boolean:
 		return nativeBoolToBooleanObject(node.Value)
 	case *ast.PrefixExpression:
@@ -87,14 +95,16 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 }
 
 func applyFunction(fn object.Object, args []object.Object) object.Object {
-	function, ok := fn.(*object.Function)
-	if !ok {
+	switch fn := fn.(type) {
+	case *object.Function:
+		extendedEnv := extendFunctionEnv(fn, args)
+		evaluated := Eval(fn.Body, extendedEnv)
+		return unwrapReturnValue(evaluated)
+	case *object.Builtin:
+		return fn.Fn(args...)
+	default:
 		return newError("not a function: %s", fn.Type())
 	}
-
-	extendedEnv := extendFunctionEnv(function, args)
-	evaluated := Eval(function.Body, extendedEnv)
-	return unwrapReturnValue(evaluated)
 }
 
 func extendFunctionEnv(fn *object.Function, args []object.Object) *object.Environment {
@@ -128,12 +138,13 @@ func evalExpression(exps []ast.Expression, env *object.Environment) []object.Obj
 }
 
 func evalIdentifier(node *ast.Identifier, env *object.Environment) object.Object {
-	val, ok := env.Get(node.Value)
-	if !ok {
-		return newError("identifier not found: %s", node.Value)
+	if val, ok := env.Get(node.Value); ok {
+		return val
 	}
-
-	return val
+	if builtin, ok := builtins[node.Value]; ok {
+		return builtin
+	}
+	return newError("identifier not found: %s", node.Value)
 }
 
 func evalProgram(program *ast.Program, env object.Environment) object.Object {
@@ -219,7 +230,7 @@ func evalInfixExpression(operator string, left, right object.Object) object.Obje
 	}
 }
 
-func evalFloatInfixExpression(operator string, left,right object.Object)object.Object{
+func evalFloatInfixExpression(operator string, left, right object.Object) object.Object {
 	leftVal := left.(*object.Float).Value
 	rightVal := right.(*object.Float).Value
 
@@ -249,36 +260,36 @@ func evalFloatInfixExpression(operator string, left,right object.Object)object.O
 	}
 }
 
-func evalMixedStringOrCharInfixExpression(operator string, left, right object.Object)object.Object{
-	if operator != "+"{
+func evalMixedStringOrCharInfixExpression(operator string, left, right object.Object) object.Object {
+	if operator != "+" {
 		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
 	}
-	
+
 	leftVal := left.(*object.String).Value
 	rightVal := right.(*object.Char).Value
-	
+
 	return &object.String{Value: leftVal + string(rightVal)}
 }
 
-func evalCharInfixExpression(operator string, left, right object.Object)object.Object{
+func evalCharInfixExpression(operator string, left, right object.Object) object.Object {
 	leftVal := left.(*object.Char).Value
 	rightVal := right.(*object.Char).Value
 	switch operator {
-		case "+":
-			return &object.String{Value: string(leftVal) + string(rightVal)}
-		default:
-			return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
-	}	
-}
-
-func evalStringInfixExpression(operator string, left,right object.Object)object.Object{
-	if operator != "+"{
+	case "+":
+		return &object.String{Value: string(leftVal) + string(rightVal)}
+	default:
 		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
 	}
-	
+}
+
+func evalStringInfixExpression(operator string, left, right object.Object) object.Object {
+	if operator != "+" {
+		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
+	}
+
 	leftVal := left.(*object.String).Value
 	rightVal := right.(*object.String).Value
-	
+
 	return &object.String{Value: leftVal + rightVal}
 }
 
@@ -364,6 +375,6 @@ func isError(obj object.Object) bool {
 	return false
 }
 
-func isStringOrChar(obj object.Object) bool{
+func isStringOrChar(obj object.Object) bool {
 	return obj.Type() == object.STRING_OBJ || obj.Type() == object.CHAR_OBJ
 }
