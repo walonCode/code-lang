@@ -255,3 +255,13 @@ func (ce *CallExpression) String() string {
 	out.WriteString(")")
 	return out.String()
 }
+
+//strings
+type StringLiteral struct {
+	Token token.Token
+	Value string
+}
+//method on string 
+func (sl *StringLiteral) expressionNode() {}
+func (sl *StringLiteral) TokenLiteral() string { return sl.Token.Literal }
+func (sl *StringLiteral) String() string { return sl.Token.Literal }

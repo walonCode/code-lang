@@ -27,6 +27,8 @@ func TestNextToken(t *testing.T){
 	10 != 9;
 	10 >= 9;
 	10 <= 9;
+	"foobar"
+	"foo bar"
 	`
 	
 	test := []struct{
@@ -115,6 +117,8 @@ func TestNextToken(t *testing.T){
 		{token.LESS_THAN_EQUAL, "<="},
 		{token.INT, "9"},
 		{token.SEMICOLON, ";"},
+		{token.STRING, "foobar"},
+		{token.STRING, "foo bar"},
 		{token.EOF, ""},
 	}
 	
@@ -122,7 +126,7 @@ func TestNextToken(t *testing.T){
 	
 	for i, tt := range test {
 		tok := l.NextToken()
-		println(tok.Type, tt.expectedType)
+		// println(tok.Type, tt.expectedType)
 		if tok.Type != tt.expectedType{
 			t.Fatalf("tests[%d] - tokentype wrong. expected=%v, got=%v",
 				i, tt.expectedType,tok.Type)
