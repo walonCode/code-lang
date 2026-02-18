@@ -27,14 +27,13 @@ func ruleFile(path string){
 		os.Exit(1)
 	}
 	
-	file, err := os.Open(path)
+	file, err := os.ReadFile(path)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: could not open file %s\n",path)
 		os.Exit(1)
 	}
-	defer file.Close()
 	
-	repl.Start(file, os.Stdout)
+	repl.Execute(string(file), os.Stdout)
 }
 
 func runRepl(){

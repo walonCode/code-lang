@@ -62,3 +62,21 @@ func printParserError(out io.Writer, errors []string){
 		io.WriteString(out, "\t"+msg+"\n")
 	}
 }
+
+
+func Execute(source string, out io.Writer){
+	l := lexer.New(source)
+	p := parser.New(l)
+	program := p.ParsePrograme()
+	
+	if len(p.Errors()) != 0 {
+		printParserError(out, p.Errors())
+		return
+	}
+	
+	evaluated := evaluator.Eval(program, object.NewEnvironment())
+	if evaluated != nil {
+		io.WriteString(out, evaluated.Inspect())
+        io.WriteString(out, "\n")
+	}
+}
