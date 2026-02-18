@@ -12,7 +12,7 @@ var GeneralBuiltins = map[string]*object.Builtin{
 			for _, value := range args {
 				fmt.Println(value.Inspect())
 			}
-			return object.NULL
+			return nil
 		},
 	},
 	"len": {
