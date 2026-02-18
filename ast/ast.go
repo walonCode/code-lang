@@ -117,14 +117,14 @@ func(i *Identifier)expressionNode(){}
 func (i *Identifier)TokenLiteral()string { return i.Token.Literal}
 func (i *Identifier)String()string { return i.Value}
 
-type IntergerLiteral struct {
+type IntegerLiteral struct {
 	Token token.Token
 	Value int64
 }
 //methods on Interger Literal
-func(i *IntergerLiteral)expressionNode(){}
-func (i *IntergerLiteral)TokenLiteral()string { return i.Token.Literal}
-func (i *IntergerLiteral)String()string { return i.Token.Literal}
+func(i *IntegerLiteral)expressionNode(){}
+func (i *IntegerLiteral)TokenLiteral()string { return i.Token.Literal}
+func (i *IntegerLiteral)String()string { return i.Token.Literal}
 
 type ExpressionStatement struct {
 	Token token.Token

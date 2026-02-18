@@ -104,7 +104,7 @@ func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 
 func (p *Parser) parseIntergerLiteral() ast.Expression {
 	// defer untrace(trace("parseIntergerLiteral"))
-	il := &ast.IntergerLiteral{Token: p.curToken}
+	il := &ast.IntegerLiteral{Token: p.curToken}
 
 	value, err := strconv.Atoi(p.curToken.Literal)
 	if err != nil {
