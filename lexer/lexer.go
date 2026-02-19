@@ -100,6 +100,8 @@ func(l *Lexer)NextToken()token.Token{
 		case '.':
 			tok.Type = token.FLOAT
 			tok.Literal = l.readFloat()
+		case ':':
+			tok = newToken(token.COLON, l.ch)
 		case 0:
 			tok.Literal = ""
 			tok.Type = token.EOF
