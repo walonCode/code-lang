@@ -32,6 +32,9 @@ var precendeces = map[token.TokenType]int{
 	token.MINUS:              SUM,
 	token.SLASH:              PRODUCT,
 	token.ASTERISK:           PRODUCT,
+	token.FLOOR:              PRODUCT,
+	token.REM:                PRODUCT,
+	token.SQUARE:             PRODUCT,
 	token.LPAREN:             CALL,
 	token.LBRACKET:           INDEX,
 }
@@ -277,6 +280,9 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.MINUS, p.parseInfixExpression)
 	p.registerInfix(token.SLASH, p.parseInfixExpression)
 	p.registerInfix(token.ASTERISK, p.parseInfixExpression)
+	p.registerInfix(token.REM, p.parseInfixExpression)
+	p.registerInfix(token.SQUARE, p.parseInfixExpression)
+	p.registerInfix(token.FLOOR, p.parseInfixExpression)
 	p.registerInfix(token.EQ, p.parseInfixExpression)
 	p.registerInfix(token.NOT_EQ, p.parseInfixExpression)
 	p.registerInfix(token.LT, p.parseInfixExpression)
@@ -288,32 +294,32 @@ func New(l *lexer.Lexer) *Parser {
 	return p
 }
 
-func(p *Parser)parseHashLiteral()ast.Expression{
+func (p *Parser) parseHashLiteral() ast.Expression {
 	hash := &ast.HashLiteral{Token: p.curToken}
 	hash.Pairs = make(map[ast.Expression]ast.Expression)
-	
-	for !p.peekTokenIs(token.RBRACE){	
+
+	for !p.peekTokenIs(token.RBRACE) {
 		p.nextToken()
 		key := p.parseExpression(LOWEST)
-		
-		if !p.expectPeek(token.COLON){
+
+		if !p.expectPeek(token.COLON) {
 			return nil
 		}
-		
+
 		p.nextToken()
 		value := p.parseExpression(LOWEST)
-		
+
 		hash.Pairs[key] = value
-		
-		if !p.peekTokenIs(token.RBRACE) && !p.expectPeek(token.COMMA){
+
+		if !p.peekTokenIs(token.RBRACE) && !p.expectPeek(token.COMMA) {
 			return nil
-		} 
+		}
 	}
-	
-	if !p.expectPeek(token.RBRACE){
+
+	if !p.expectPeek(token.RBRACE) {
 		return nil
 	}
-	
+
 	return hash
 }
 
