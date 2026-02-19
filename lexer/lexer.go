@@ -68,9 +68,21 @@ func(l *Lexer)NextToken()token.Token{
 				tok = newToken(token.BANG, l.ch)
 			}
 		case '/':
-			tok = newToken(token.SLASH, l.ch)
+			if l.peakChar() == '/' {
+				ch := l.ch
+				l.readChar()
+				tok = token.Token{Type: token.FLOOR, Literal: string(ch)+string(l.ch)}
+			}else {
+				tok = newToken(token.SLASH, l.ch)
+			}
 		case '*':
-			tok = newToken(token.ASTERISK, l.ch)
+			if l.peakChar() == '*' {
+				ch := l.ch
+				l.readChar()
+				tok = token.Token{Type: token.SQUARE, Literal: string(ch)+string(l.ch)}
+			}else{
+				tok = newToken(token.ASTERISK, l.ch)
+			}
 		case '<':
 			if l.peakChar() == '='{
 				ch := l.ch
@@ -89,6 +101,8 @@ func(l *Lexer)NextToken()token.Token{
 			}
 		case ';':
 			tok = newToken(token.SEMICOLON, l.ch)
+		case '%':
+			tok = newToken(token.REM, l.ch)
 		case ',':
 			tok = newToken(token.COMMA, l.ch)
 		case '"':

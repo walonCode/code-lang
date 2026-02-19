@@ -22,6 +22,11 @@ const (
 	MINUS = "-"
 	BANG = "!"
 	ASTERISK = "*"
+	
+	REM = "%"
+	SQUARE = "**"
+	FLOOR = "//"
+	
 	SLASH = "/"
 	LT = "<"
 	GT = ">"

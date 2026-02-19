@@ -38,6 +38,9 @@ func TestNextToken(t *testing.T){
 	.5
 	[1,2];
 	{"foo":"bar"}
+	//
+	**
+	%
 	`
 	
 	test := []struct{
@@ -147,6 +150,9 @@ func TestNextToken(t *testing.T){
 		{token.COLON, ":"},
 		{token.STRING, "bar"},
 		{token.RBRACE, "}"},
+		{token.FLOOR, "//"},
+		{token.SQUARE, "**"},
+		{token.REM, "%"},
 		{token.EOF, ""},
 	}
 	
