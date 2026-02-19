@@ -1,6 +1,8 @@
 package evaluator
 
 import (
+	"math"
+
 	"github.com/walonCode/code-lang/ast"
 	"github.com/walonCode/code-lang/object"
 )
@@ -309,6 +311,12 @@ func evalFloatInfixExpression(operator string, left, right object.Object) object
 		return &object.Float{Value: leftVal * rightVal}
 	case "/":
 		return &object.Float{Value: leftVal / rightVal}
+	case "**":
+		return &object.Float{Value: (math.Pow(float64(leftVal),float64(rightVal)))}
+	case "//":
+		return &object.Float{Value: (math.Floor(float64(leftVal) / float64(rightVal)))}	
+	case "%":
+		return &object.Float{Value: (math.Mod(float64(leftVal), float64(rightVal)))}	
 	case "<":
 		return nativeBoolToBooleanObject(leftVal < rightVal)
 	case ">":
@@ -372,6 +380,12 @@ func evalIntegerInfixExpression(operator string, left, right object.Object) obje
 		return &object.Integer{Value: leftVal * rightVal}
 	case "/":
 		return &object.Integer{Value: leftVal / rightVal}
+	case "**":
+		return &object.Integer{Value: int64(math.Pow(float64(leftVal),float64(rightVal)))}
+	case "//":
+		return &object.Integer{Value: int64(math.Floor(float64(leftVal) / float64(rightVal)))}	
+	case "%":
+		return &object.Integer{Value: int64(math.Mod(float64(leftVal), float64(rightVal)))}
 	case "<":
 		return nativeBoolToBooleanObject(leftVal < rightVal)
 	case ">":
