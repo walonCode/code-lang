@@ -200,10 +200,16 @@ func (b *Boolean) Line() int { return b.Token.Line }
 func (b *Boolean) Column() int { return b.Token.Column }
 
 // if expression
+type ELSE_IF struct {
+	Condition Expression
+	Consequence *BlockStatement
+}
+
 type IfExpression struct {
 	Token       token.Token
 	Condition   Expression
 	Consequence *BlockStatement
+	IfElse []*ELSE_IF
 	Alternative *BlockStatement
 }
 

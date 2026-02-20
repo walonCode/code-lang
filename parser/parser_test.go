@@ -599,7 +599,7 @@ func TestIfExpression(t *testing.T) {
 }
 
 func TestIfElseExpression(t *testing.T) {
-	input := `if (x < y) { x } else { y }`
+	input := `if (x < y) { x; } else { y;};`
 
 	l := lexer.New(input)
 	p := New(l)
@@ -653,6 +653,95 @@ func TestIfElseExpression(t *testing.T) {
 	}
 
 	if !testIdentifier(t, alternative.Expression, "y") {
+		return
+	}
+}
+
+
+func TestIfElseIfExpression(t *testing.T) {
+	input := `if (x < y) { x; } elseif (x > y) { y; } else { x + y; };`
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParsePrograme()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Body does not contain %d statements. got=%d\n",
+			1, len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T",
+			program.Statements[0])
+	}
+
+	exp, ok := stmt.Expression.(*ast.IfExpression)
+	if !ok {
+		t.Fatalf("stmt.Expression is not ast.IfExpression. got=%T", stmt.Expression)
+	}
+
+	if !testInfixExpression(t, exp.Condition, "x", "<", "y") {
+		return
+	}
+
+	if len(exp.Consequence.Statements) != 1 {
+		t.Errorf("consequence is not 1 statements. got=%d\n",
+			len(exp.Consequence.Statements))
+	}
+
+	consequence, ok := exp.Consequence.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("Statements[0] is not ast.ExpressionStatement. got=%T",
+			exp.Consequence.Statements[0])
+	}
+
+	if !testIdentifier(t, consequence.Expression, "x") {
+		return
+	}
+
+	if len(exp.Alternative.Statements) != 1 {
+		t.Errorf("exp.Alternative.Statements does not contain 1 statements. got=%d\n",
+			len(exp.Alternative.Statements))
+	}
+
+	if len(exp.IfElse) != 1 {
+		t.Errorf("exp.IfElse does not contain 1 statements. got=%d\n",
+			len(exp.IfElse))
+	}
+
+	if !testInfixExpression(t, exp.IfElse[0].Condition, "x", ">", "y") {
+		return
+	}
+
+	if len(exp.IfElse[0].Consequence.Statements) != 1 {
+		t.Errorf("exp.IfElse[0].Consequence.Statements does not contain 1 statements. got=%d\n",
+			len(exp.IfElse[0].Consequence.Statements))
+	}
+
+	if_else, ok := exp.IfElse[0].Consequence.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("Statements[0] is not ast.ExpressionStatement. got=%T",
+			exp.IfElse[0].Consequence.Statements[0])
+	}
+
+	if !testIdentifier(t, if_else.Expression, "y") {
+		return
+	}
+
+	if len(exp.Alternative.Statements) != 1 {
+		t.Errorf("exp.Alternative.Statements does not contain 1 statements. got=%d\n",
+			exp.Alternative.Statements)
+	}
+
+	alternative, ok := exp.Alternative.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("Statements[0] is not ast.ExpressionStatement. got=%T",
+			exp.Alternative.Statements[0])
+	}
+
+	if !testInfixExpression(t, alternative.Expression, "x", "+", "y") {
 		return
 	}
 }
