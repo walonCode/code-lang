@@ -539,3 +539,15 @@ func TestHashIndexExpressions(t *testing.T) {
 		}
 	}
 }
+
+func TestForLoopSideEffect(t *testing.T) {
+	input := `
+    let total = 0;
+    for (let i = 1; i <= 3; i = i + 1) {
+        total = total + i;
+    };
+    total;
+    `
+	evaluated := testEval(input)
+	testIntegerObject(t, evaluated, 6) // 1 + 2 + 3 = 6
+}
