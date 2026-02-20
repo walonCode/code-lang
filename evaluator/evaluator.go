@@ -100,6 +100,8 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		return &object.Array{Elements: elements}
 	case *ast.ForExpression:
 		return evalForExpression(node, env)
+	case *ast.WhileExpression:
+		return evalWhileExpression(node, env)
 	case *ast.IndexExpression:
 		left := Eval(node.Left, env)
 		if isError(left) {
@@ -115,6 +117,33 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 	}
 
 	return nil
+}
+
+func evalWhileExpression(node *ast.WhileExpression, env *object.Environment)object.Object{
+	var result object.Object = object.NULL
+	
+	for {
+		if node.Condition != nil {
+			condition := Eval(node.Condition,env)
+			if isError(condition){
+				return condition
+			}
+			
+			if !isTruthy(condition){
+				break
+			}
+		}
+		
+		result = Eval(node.Body, env)
+		if result != nil {
+			rt := result.Type()
+			if rt == object.RETURN_VALUE_OBJ || rt == object.ERROR_OBJ{
+				return result
+			}
+		}
+	}
+	
+	return result
 }
 
 func evalForExpression(node *ast.ForExpression, env *object.Environment) object.Object {
