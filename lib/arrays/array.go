@@ -1,16 +1,19 @@
 package arrays
 
-import "github.com/walonCode/code-lang/object"
+import (
+	"github.com/walonCode/code-lang/ast"
+	"github.com/walonCode/code-lang/object"
+)
 
 var ArrayBuiltins = map[string]*object.Builtin{
 	"first": {
-		Fn: func(args ...object.Object) object.Object {
+		Fn: func(node *ast.CallExpression, args ...object.Object) object.Object {
 			if len(args) != 1 {
-				return object.NewError("wrong number of arguments. got=%d, want=1", len(args))
+				return object.NewError(node.Line(), node.Column(),"wrong number of arguments. got=%d, want=1", len(args))
 			}
 
 			if args[0].Type() != object.ARRAY_OBJ {
-				return object.NewError("argument to `first` must be ARRAY, got %s",
+				return object.NewError(node.Line(), node.Column(),"argument to `first` must be ARRAY, got %s",
 					args[0].Type())
 			}
 
@@ -22,13 +25,13 @@ var ArrayBuiltins = map[string]*object.Builtin{
 		},
 	},
 	"last": {
-		Fn: func(args ...object.Object) object.Object {
+		Fn: func(node *ast.CallExpression, args ...object.Object) object.Object {
 			if len(args) != 1 {
-				return object.NewError("wrong number of arguments. got=%d, want=1", len(args))
+				return object.NewError(node.Line(), node.Column(),"wrong number of arguments. got=%d, want=1", len(args))
 			}
 
 			if args[0].Type() != object.ARRAY_OBJ {
-				return object.NewError("argument to `last` must be ARRAY, got %s",
+				return object.NewError(node.Line(), node.Column(),"argument to `last` must be ARRAY, got %s",
 					args[0].Type())
 			}
 
@@ -41,13 +44,13 @@ var ArrayBuiltins = map[string]*object.Builtin{
 		},
 	},
 	"rest": {
-		Fn: func(args ...object.Object) object.Object {
+		Fn: func(node *ast.CallExpression, args ...object.Object) object.Object {
 			if len(args) != 1 {
-				return object.NewError("wrong number of arguments. got=%d, want=1", len(args))
+				return object.NewError(node.Line(), node.Column(),"wrong number of arguments. got=%d, want=1", len(args))
 			}
 
 			if args[0].Type() != object.ARRAY_OBJ {
-				return object.NewError("argument to `rest` must be ARRAY, got %s",
+				return object.NewError(node.Line(), node.Column(),"argument to `rest` must be ARRAY, got %s",
 					args[0].Type())
 			}
 
@@ -62,13 +65,13 @@ var ArrayBuiltins = map[string]*object.Builtin{
 		},
 	},
 	"push": {
-		Fn: func(args ...object.Object) object.Object {
+		Fn: func(node *ast.CallExpression, args ...object.Object) object.Object {
 			if len(args) != 2 {
-				return object.NewError("wrong number of arguments. got=%d, want=2", len(args))
+				return object.NewError(node.Line(), node.Column(),"wrong number of arguments. got=%d, want=2", len(args))
 			}
 
 			if args[0].Type() != object.ARRAY_OBJ {
-				return object.NewError("argument to `rest` must be ARRAY, got %s",
+				return object.NewError(node.Line(), node.Column(),"argument to `rest` must be ARRAY, got %s",
 					args[0].Type())
 			}
 

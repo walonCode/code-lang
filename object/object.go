@@ -9,7 +9,7 @@ import (
 	"github.com/walonCode/code-lang/ast"
 )
 
-type BuiltinFunction func(args ...Object) Object
+type BuiltinFunction func(node *ast.CallExpression, args ...Object) Object
 type ObjectType string
 
 // constant for each object type
@@ -77,13 +77,17 @@ func (rv *ReturnValue) Inspect() string  { return rv.Value.Inspect() }
 // error object
 type Error struct {
 	Message string
+	Line    int
+	Column  int
 }
 
 func (e *Error) Type() ObjectType { return ERROR_OBJ }
-func (e *Error) Inspect() string  { return "ERROR: " + e.Message }
+func (e *Error) Inspect() string {
+	return fmt.Sprintf("[Line %d, Column %d] ERROR: %s", e.Line, e.Column, e.Message)
+}
 
-func NewError(format string, a ...any) *Error {
-	return &Error{Message: fmt.Sprintf(format, a...)}
+func NewError(line, col int, format string, a ...any) *Error {
+	return &Error{Message: fmt.Sprintf(format, a...), Line: line, Column: col}
 }
 
 // function object

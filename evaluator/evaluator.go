@@ -43,7 +43,7 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		if isError(right) {
 			return right
 		}
-		return evalPrefixExpression(node.Operator, right)
+		return evalPrefixExpression(node, right)
 	case *ast.InfixExpression:
 		left := Eval(node.Left, env)
 		if isError(left) {
@@ -53,7 +53,7 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		if isError(right) {
 			return right
 		}
-		return evalInfixExpression(node.Operator, left, right)
+		return evalInfixExpression(node, left, right)
 	case *ast.BlockStatement:
 		return evalBlockStatements(node, *env)
 	case *ast.IfExpression:
@@ -73,7 +73,7 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		if len(args) == 1 && isError(args[0]) {
 			return args[0]
 		}
-		return applyFunction(function, args)
+		return applyFunction(function, args, node)
 	case *ast.ArrayLiteral:
 		elements := evalExpression(node.Elements, env)
 		if len(elements) == 1 && isError(elements[0]) {
@@ -89,7 +89,7 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		if isError(index) {
 			return index
 		}
-		return evalIndexExpression(left, index)
+		return evalIndexExpression(left, index, node)
 	case *ast.HashLiteral:
 		return evalHashLiteral(node, env)
 	}
@@ -108,7 +108,7 @@ func evalHashLiteral(node *ast.HashLiteral, env *object.Environment) object.Obje
 
 		hashkey, ok := key.(object.Hashable)
 		if !ok {
-			return object.NewError("unusable as hash key: %s", key.Type())
+			return object.NewError(node.Line(), node.Column(),"unusable as hash key: %s", key.Type())
 		}
 
 		value := Eval(valueNode, env)
@@ -123,23 +123,23 @@ func evalHashLiteral(node *ast.HashLiteral, env *object.Environment) object.Obje
 	return &object.Hash{Pairs: pairs}
 }
 
-func evalIndexExpression(left, index object.Object) object.Object {
+func evalIndexExpression(left, index object.Object, node *ast.IndexExpression) object.Object {
 	switch {
 	case left.Type() == object.ARRAY_OBJ && index.Type() == object.INTEGER_OBJ:
 		return evalArrayIndexExpression(left, index)
 	case left.Type() == object.HASH_OBJ:
-		return evalHashIndexExpression(left, index)
+		return evalHashIndexExpression(left, index, node)
 	default:
-		return object.NewError("index operator not supported: %s", left.Type())
+		return object.NewError(node.Line(), node.Column(),"index operator not supported: %s", left.Type())
 	}
 }
 
-func evalHashIndexExpression(hash, index object.Object)object.Object{
+func evalHashIndexExpression(hash, index object.Object, node *ast.IndexExpression)object.Object{
 	hashObj := hash.(*object.Hash)
 	
 	key, ok := index.(object.Hashable)
 	if !ok{
-		return object.NewError("unusable as hash key: %s", index.Type())
+		return object.NewError(node.Line(), node.Column(),"unusable as hash key: %s", index.Type())
 	}
 	
 	pair, ok := hashObj.Pairs[key.HashKey()]
@@ -162,16 +162,16 @@ func evalArrayIndexExpression(left, index object.Object) object.Object {
 	return arrayObj.Elements[idx]
 }
 
-func applyFunction(fn object.Object, args []object.Object) object.Object {
+func applyFunction(fn object.Object, args []object.Object, node *ast.CallExpression) object.Object {
 	switch fn := fn.(type) {
 	case *object.Function:
 		extendedEnv := extendFunctionEnv(fn, args)
 		evaluated := Eval(fn.Body, extendedEnv)
 		return unwrapReturnValue(evaluated)
 	case *object.Builtin:
-		return fn.Fn(args...)
+		return fn.Fn(node, args...)
 	default:
-		return object.NewError("not a function: %s", fn.Type())
+		return object.NewError(node.Line(), node.Column(),"not a function: %s", fn.Type())
 	}
 }
 
@@ -212,7 +212,7 @@ func evalIdentifier(node *ast.Identifier, env *object.Environment) object.Object
 	if builtin, ok := builtins[node.Value]; ok {
 		return builtin
 	}
-	return object.NewError("identifier not found: %s", node.Value)
+	return object.NewError(node.Line(), node.Column(),"identifier not found: %s", node.Value)
 }
 
 func evalProgram(program *ast.Program, env object.Environment) object.Object {
@@ -277,32 +277,32 @@ func isTruthy(obj object.Object) bool {
 	}
 }
 
-func evalInfixExpression(operator string, left, right object.Object) object.Object {
+func evalInfixExpression(node *ast.InfixExpression, left, right object.Object) object.Object {
 	switch {
 	case left.Type() == object.INTEGER_OBJ && right.Type() == object.INTEGER_OBJ:
-		return evalIntegerInfixExpression(operator, left, right)
+		return evalIntegerInfixExpression(node, left, right)
 	case left.Type() == object.FLOAT_OBJ && right.Type() == object.FLOAT_OBJ:
-		return evalFloatInfixExpression(operator, left, right)
-	case operator == "==":
+		return evalFloatInfixExpression(node, left, right)
+	case node.Operator == "==":
 		return nativeBoolToBooleanObject(left == right)
-	case operator == "!=":
+	case node.Operator == "!=":
 		return nativeBoolToBooleanObject(left != right)
 	case left.Type() == object.STRING_OBJ && right.Type() == object.STRING_OBJ:
-		return evalStringInfixExpression(operator, left, right)
+		return evalStringInfixExpression(node, left, right)
 	case left.Type() == object.CHAR_OBJ && right.Type() == object.CHAR_OBJ:
-		return evalCharInfixExpression(operator, left, right)
+		return evalCharInfixExpression(node, left, right)
 	case isStringOrChar(left) && isStringOrChar(right):
-		return evalMixedStringOrCharInfixExpression(operator, left, right)
+		return evalMixedStringOrCharInfixExpression(node, left, right)
 	default:
-		return object.NewError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
+		return object.NewError(node.Line(), node.Column(),"unknown operator: %s %s %s", left.Type(), node.Operator, right.Type())
 	}
 }
 
-func evalFloatInfixExpression(operator string, left, right object.Object) object.Object {
+func evalFloatInfixExpression(node *ast.InfixExpression, left, right object.Object) object.Object {
 	leftVal := left.(*object.Float).Value
 	rightVal := right.(*object.Float).Value
 
-	switch operator {
+	switch node.Operator {
 	case "+":
 		return &object.Float{Value: leftVal + rightVal}
 	case "-":
@@ -330,13 +330,13 @@ func evalFloatInfixExpression(operator string, left, right object.Object) object
 	case ">=":
 		return nativeBoolToBooleanObject(leftVal >= rightVal)
 	default:
-		return object.NewError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
+		return object.NewError(node.Line(), node.Column(),"unknown operator: %s %s %s", left.Type(), node.Operator, right.Type())
 	}
 }
 
-func evalMixedStringOrCharInfixExpression(operator string, left, right object.Object) object.Object {
-	if operator != "+" {
-		return object.NewError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
+func evalMixedStringOrCharInfixExpression(node *ast.InfixExpression, left, right object.Object) object.Object {
+	if node.Operator != "+" {
+		return object.NewError(node.Line(), node.Column(),"unknown operator: %s %s %s", left.Type(), node.Operator, right.Type())
 	}
 
 	leftVal := left.(*object.String).Value
@@ -345,20 +345,20 @@ func evalMixedStringOrCharInfixExpression(operator string, left, right object.Ob
 	return &object.String{Value: leftVal + string(rightVal)}
 }
 
-func evalCharInfixExpression(operator string, left, right object.Object) object.Object {
+func evalCharInfixExpression(node *ast.InfixExpression, left, right object.Object) object.Object {
 	leftVal := left.(*object.Char).Value
 	rightVal := right.(*object.Char).Value
-	switch operator {
+	switch node.Operator {
 	case "+":
 		return &object.String{Value: string(leftVal) + string(rightVal)}
 	default:
-		return object.NewError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
+		return object.NewError(node.Line(), node.Column(),"unknown operator: %s %s %s", left.Type(), node.Operator, right.Type())
 	}
 }
 
-func evalStringInfixExpression(operator string, left, right object.Object) object.Object {
-	if operator != "+" {
-		return object.NewError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
+func evalStringInfixExpression(node *ast.InfixExpression, left, right object.Object) object.Object {
+	if node.Operator != "+" {
+		return object.NewError(node.Line(), node.Column(),"unknown operator: %s %s %s", left.Type(), node.Operator, right.Type())
 	}
 
 	leftVal := left.(*object.String).Value
@@ -367,11 +367,11 @@ func evalStringInfixExpression(operator string, left, right object.Object) objec
 	return &object.String{Value: leftVal + rightVal}
 }
 
-func evalIntegerInfixExpression(operator string, left, right object.Object) object.Object {
+func evalIntegerInfixExpression(node *ast.InfixExpression, left, right object.Object) object.Object {
 	leftVal := left.(*object.Integer).Value
 	rightVal := right.(*object.Integer).Value
 
-	switch operator {
+	switch node.Operator {
 	case "+":
 		return &object.Integer{Value: leftVal + rightVal}
 	case "-":
@@ -399,24 +399,24 @@ func evalIntegerInfixExpression(operator string, left, right object.Object) obje
 	case ">=":
 		return nativeBoolToBooleanObject(leftVal >= rightVal)
 	default:
-		return object.NewError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
+		return object.NewError(node.Line(), node.Column(),"unknown operator: %s %s %s", left.Type(), node.Operator, right.Type())
 	}
 }
 
-func evalPrefixExpression(operator string, right object.Object) object.Object {
-	switch operator {
+func evalPrefixExpression(node *ast.PrefixExpression, right object.Object) object.Object {
+	switch node.Operator {
 	case "!":
 		return evalBangOperatorExpression(right)
 	case "-":
-		return evalMinusOperatorExpression(right)
+		return evalMinusOperatorExpression(node,right)
 	default:
-		return object.NewError("unknown operator: %s%s", operator, right.Type())
+		return object.NewError(node.Line(), node.Column(),"unknown operator: %s%s", node.Operator, right.Type())
 	}
 }
 
-func evalMinusOperatorExpression(right object.Object) object.Object {
+func evalMinusOperatorExpression(node *ast.PrefixExpression,right object.Object) object.Object {
 	if right.Type() != object.INTEGER_OBJ {
-		return object.NewError("unknown operator: -%s", right.Type())
+		return object.NewError(node.Line(), node.Column(),"unknown operator: -%s", right.Type())
 	}
 
 	value := right.(*object.Integer).Value
