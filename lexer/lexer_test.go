@@ -41,6 +41,11 @@ func TestNextToken(t *testing.T){
 	//
 	**
 	%
+	elseif
+	for 
+	while
+	break
+	continue
 	`
 	
 	test := []struct{
@@ -153,6 +158,11 @@ func TestNextToken(t *testing.T){
 		{token.FLOOR, "//"},
 		{token.SQUARE, "**"},
 		{token.REM, "%"},
+		{token.ELSE_IF, "elseif"},
+		{token.FOR, "for"},
+		{token.WHILE, "while"},
+		{token.BREAK, "break"},
+		{token.CONTINUE, "continue"},
 		{token.EOF, ""},
 	}
 	

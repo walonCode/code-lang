@@ -54,6 +54,11 @@ const (
 	IF = "IF"
 	ELSE = "ELSE"
 	RETURN = "RETURN"
+	ELSE_IF = "ELSE_IF"
+	FOR = "FOR"
+	WHILE = "WHILE"
+	CONTINUE = "CONTINUE"
+	BREAK = "BREAK"
 )
 
 var keywords = map[string]TokenType{
@@ -63,7 +68,12 @@ var keywords = map[string]TokenType{
 	"false":FALSE,
 	"if":IF,
 	"else":ELSE,
+	"elseif":ELSE_IF,
+	"for":FOR,
+	"while":WHILE,
 	"return":RETURN,
+	"break":BREAK,
+	"continue":CONTINUE,
 }
 
 
