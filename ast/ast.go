@@ -52,7 +52,7 @@ func (ls *LetStatement) String() string {
 
 	return out.String()
 }
-func (ls *LetStatement) Line() int { return ls.Token.Line }
+func (ls *LetStatement) Line() int   { return ls.Token.Line }
 func (ls *LetStatement) Column() int { return ls.Token.Column }
 
 type ReturnStatement struct {
@@ -72,7 +72,7 @@ func (i *ReturnStatement) String() string {
 	out.WriteString(";")
 	return out.String()
 }
-func (i *ReturnStatement) Line() int { return i.Token.Line }
+func (i *ReturnStatement) Line() int   { return i.Token.Line }
 func (i *ReturnStatement) Column() int { return i.Token.Column }
 
 type PrefixExpression struct {
@@ -94,7 +94,7 @@ func (i *PrefixExpression) String() string {
 
 	return out.String()
 }
-func (i *PrefixExpression) Line() int { return i.Token.Line }
+func (i *PrefixExpression) Line() int   { return i.Token.Line }
 func (i *PrefixExpression) Column() int { return i.Token.Column }
 
 type InfixExpression struct {
@@ -118,7 +118,7 @@ func (i *InfixExpression) String() string {
 
 	return out.String()
 }
-func (i *InfixExpression) Line() int { return i.Token.Line }
+func (i *InfixExpression) Line() int   { return i.Token.Line }
 func (i *InfixExpression) Column() int { return i.Token.Column }
 
 type Identifier struct {
@@ -130,8 +130,8 @@ type Identifier struct {
 func (i *Identifier) expressionNode()      {}
 func (i *Identifier) TokenLiteral() string { return i.Token.Literal }
 func (i *Identifier) String() string       { return i.Value }
-func (i *Identifier) Line() int { return i.Token.Line }
-func (i *Identifier) Column() int { return i.Token.Column }
+func (i *Identifier) Line() int            { return i.Token.Line }
+func (i *Identifier) Column() int          { return i.Token.Column }
 
 type IntegerLiteral struct {
 	Token token.Token
@@ -142,8 +142,8 @@ type IntegerLiteral struct {
 func (i *IntegerLiteral) expressionNode()      {}
 func (i *IntegerLiteral) TokenLiteral() string { return i.Token.Literal }
 func (i *IntegerLiteral) String() string       { return i.Token.Literal }
-func (i *IntegerLiteral) Line() int { return i.Token.Line }
-func (i *IntegerLiteral) Column() int { return i.Token.Column }
+func (i *IntegerLiteral) Line() int            { return i.Token.Line }
+func (i *IntegerLiteral) Column() int          { return i.Token.Column }
 
 type ExpressionStatement struct {
 	Token      token.Token
@@ -159,7 +159,7 @@ func (i *ExpressionStatement) String() string {
 	}
 	return ""
 }
-func (i *ExpressionStatement) Line() int { return i.Token.Line }
+func (i *ExpressionStatement) Line() int   { return i.Token.Line }
 func (i *ExpressionStatement) Column() int { return i.Token.Column }
 
 func (p *Program) TokenLiteral() string {
@@ -179,12 +179,12 @@ func (p *Program) String() string {
 
 	return out.String()
 }
-func (p *Program) Line() int { 
+func (p *Program) Line() int {
 	if len(p.Statements) > 0 {
 		return p.Statements[0].Line()
 	}
 	return 0
- }
+}
 func (p *Program) Column() int { return p.Statements[0].Column() }
 
 // Boolean
@@ -196,21 +196,20 @@ type Boolean struct {
 func (b *Boolean) expressionNode()      {}
 func (b *Boolean) TokenLiteral() string { return b.Token.Literal }
 func (b *Boolean) String() string       { return b.Token.Literal }
-func (b *Boolean) Line() int { return b.Token.Line }
-func (b *Boolean) Column() int { return b.Token.Column }
+func (b *Boolean) Line() int            { return b.Token.Line }
+func (b *Boolean) Column() int          { return b.Token.Column }
 
 // if expression
 type ELSE_IF struct {
-	Condition Expression
+	Condition   Expression
 	Consequence *BlockStatement
 }
-
 
 type IfExpression struct {
 	Token       token.Token
 	Condition   Expression
 	Consequence *BlockStatement
-	IfElse []*ELSE_IF
+	IfElse      []*ELSE_IF
 	Alternative *BlockStatement
 }
 
@@ -224,14 +223,14 @@ func (i *IfExpression) String() string {
 	out.WriteString(i.Condition.String())
 	out.WriteString(" ")
 	out.WriteString(i.Consequence.String())
-	
-	for _,v := range i.IfElse{
+
+	for _, v := range i.IfElse {
 		out.WriteString("elseif")
 		out.WriteString(v.Condition.String())
 		out.WriteString("")
 		out.WriteString(v.Consequence.String())
 	}
-	
+
 	if i.Alternative != nil {
 		out.WriteString("else")
 		out.WriteString(i.Alternative.String())
@@ -239,7 +238,7 @@ func (i *IfExpression) String() string {
 
 	return out.String()
 }
-func (i *IfExpression) Line() int { return i.Token.Line }
+func (i *IfExpression) Line() int   { return i.Token.Line }
 func (i *IfExpression) Column() int { return i.Token.Column }
 
 type BlockStatement struct {
@@ -258,7 +257,7 @@ func (bs *BlockStatement) String() string {
 
 	return out.String()
 }
-func (bs *BlockStatement) Line() int { return bs.Token.Line }
+func (bs *BlockStatement) Line() int   { return bs.Token.Line }
 func (bs *BlockStatement) Column() int { return bs.Token.Column }
 
 // function
@@ -284,7 +283,7 @@ func (fl *FunctionLiteral) String() string {
 	out.WriteString(fl.Body.String())
 	return out.String()
 }
-func (fl *FunctionLiteral) Line() int { return fl.Token.Line }
+func (fl *FunctionLiteral) Line() int   { return fl.Token.Line }
 func (fl *FunctionLiteral) Column() int { return fl.Token.Column }
 
 // call expression
@@ -309,7 +308,7 @@ func (ce *CallExpression) String() string {
 	out.WriteString(")")
 	return out.String()
 }
-func (ce *CallExpression) Line() int { return ce.Token.Line }
+func (ce *CallExpression) Line() int   { return ce.Token.Line }
 func (ce *CallExpression) Column() int { return ce.Token.Column }
 
 // strings
@@ -322,8 +321,8 @@ type StringLiteral struct {
 func (sl *StringLiteral) expressionNode()      {}
 func (sl *StringLiteral) TokenLiteral() string { return sl.Token.Literal }
 func (sl *StringLiteral) String() string       { return sl.Token.Literal }
-func (sl *StringLiteral) Line() int { return sl.Token.Line }
-func (sl *StringLiteral) Column() int { return sl.Token.Column }
+func (sl *StringLiteral) Line() int            { return sl.Token.Line }
+func (sl *StringLiteral) Column() int          { return sl.Token.Column }
 
 // char
 type CharLiteral struct {
@@ -334,8 +333,8 @@ type CharLiteral struct {
 func (sl *CharLiteral) expressionNode()      {}
 func (sl *CharLiteral) TokenLiteral() string { return sl.Token.Literal }
 func (sl *CharLiteral) String() string       { return sl.Token.Literal }
-func (sl *CharLiteral) Line() int { return sl.Token.Line }
-func (sl *CharLiteral) Column() int { return sl.Token.Column }
+func (sl *CharLiteral) Line() int            { return sl.Token.Line }
+func (sl *CharLiteral) Column() int          { return sl.Token.Column }
 
 // float
 type FloatLiteral struct {
@@ -346,8 +345,8 @@ type FloatLiteral struct {
 func (sl *FloatLiteral) expressionNode()      {}
 func (sl *FloatLiteral) TokenLiteral() string { return sl.Token.Literal }
 func (sl *FloatLiteral) String() string       { return sl.Token.Literal }
-func (sl *FloatLiteral) Line() int { return sl.Token.Line }
-func (sl *FloatLiteral) Column() int { return sl.Token.Column }
+func (sl *FloatLiteral) Line() int            { return sl.Token.Line }
+func (sl *FloatLiteral) Column() int          { return sl.Token.Column }
 
 // array
 type ArrayLiteral struct {
@@ -369,7 +368,7 @@ func (al *ArrayLiteral) String() string {
 	out.WriteString("]")
 	return out.String()
 }
-func (al *ArrayLiteral) Line() int { return al.Token.Line }
+func (al *ArrayLiteral) Line() int   { return al.Token.Line }
 func (al *ArrayLiteral) Column() int { return al.Token.Column }
 
 // array index expression
@@ -391,7 +390,7 @@ func (ie *IndexExpression) String() string {
 	out.WriteString("])")
 	return out.String()
 }
-func (ie *IndexExpression) Line() int { return ie.Token.Line }
+func (ie *IndexExpression) Line() int   { return ie.Token.Line }
 func (ie *IndexExpression) Column() int { return ie.Token.Column }
 
 // hash literal
@@ -413,6 +412,39 @@ func (hl *HashLiteral) String() string {
 	out.WriteString("}")
 	return out.String()
 }
-func (hl *HashLiteral) Line() int { return hl.Token.Line }
+func (hl *HashLiteral) Line() int   { return hl.Token.Line }
 func (hl *HashLiteral) Column() int { return hl.Token.Column }
 
+type ForExpression struct {
+	Token     token.Token // The 'for' token
+	Init      Statement   // e.g., let i = 0;
+	Condition Expression  // e.g., i < 10;
+	Post      Statement   // e.g., i = i + 1; (usually as an expression statement)
+	Body      *BlockStatement
+}
+
+func (f *ForExpression) expressionNode()      {}
+func (f *ForExpression) TokenLiteral() string { return f.Token.Literal }
+func (f *ForExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("for")
+	out.WriteString("(")
+	if f.Init != nil {
+		out.WriteString(f.Init.String())
+	}
+	out.WriteString("; ")
+	if f.Condition != nil {
+		out.WriteString(f.Condition.String())
+	}
+	out.WriteString("; ")
+	if f.Post != nil {
+		out.WriteString(f.Post.String())
+	}
+	out.WriteString(") ")
+	out.WriteString(f.Body.String())
+
+	return out.String()
+}
+func (f *ForExpression) Line() int   { return f.Token.Line }
+func (f *ForExpression) Column() int { return f.Token.Column }

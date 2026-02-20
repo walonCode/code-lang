@@ -12,6 +12,7 @@ import (
 const (
 	_ int = iota
 	LOWEST
+	ASSIGN      // =
 	EQUALS      // ==
 	LESSGREATER // > or <
 	SUM         // +
@@ -23,6 +24,7 @@ const (
 
 var precendeces = map[token.TokenType]int{
 	token.EQ:                 EQUALS,
+	token.ASSIGN:             ASSIGN,
 	token.NOT_EQ:             EQUALS,
 	token.LT:                 LESSGREATER,
 	token.GT:                 LESSGREATER,
@@ -274,6 +276,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.FLOAT, p.parseFloatLiteral)
 	p.registerPrefix(token.LBRACKET, p.parseArrayLiteral)
 	p.registerPrefix(token.LBRACE, p.parseHashLiteral)
+	p.registerPrefix(token.FOR, p.parseForExpression)
 
 	//infix
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
@@ -292,7 +295,65 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.LESS_THAN_EQUAL, p.parseInfixExpression)
 	p.registerInfix(token.LPAREN, p.parseCallExpression)
 	p.registerInfix(token.LBRACKET, p.parseIndexExpression)
+	p.registerInfix(token.ASSIGN, p.parseInfixExpression)
 	return p
+}
+
+func (p *Parser) parseForExpression() ast.Expression {
+	exp := &ast.ForExpression{Token: p.curToken}
+
+	if !p.expectPeek(token.LPAREN) {
+		return nil
+	}
+
+	p.nextToken() // curToken is now Init or ;
+
+	// Init
+	if p.curTokenIs(token.SEMICOLON) {
+		exp.Init = nil
+	} else {
+		exp.Init = p.parseStatement()
+	}
+
+	// parseStatement for Init (Let/Expression) will have consumed its semicolon.
+	// CurToken is now ';'.
+	p.nextToken() // Move to Condition
+
+	// Condition
+	if p.curTokenIs(token.SEMICOLON) {
+		exp.Condition = nil
+	} else {
+		exp.Condition = p.parseExpression(LOWEST)
+		if !p.expectPeek(token.SEMICOLON) {
+			return nil
+		}
+	}
+
+	p.nextToken() // Move past Condition's ; to Post
+
+	// Post
+	if p.curTokenIs(token.RPAREN) {
+		exp.Post = nil
+	} else {
+		// Post in for loop usually hasn't got a semicolon.
+		// parseStatement requires one, so we parse expression and wrap.
+		postExp := p.parseExpression(LOWEST)
+		if postExp != nil {
+			exp.Post = &ast.ExpressionStatement{Token: p.curToken, Expression: postExp}
+		}
+	}
+
+	if !p.expectPeek(token.RPAREN) {
+		return nil
+	}
+
+	if !p.expectPeek(token.LBRACE) {
+		return nil
+	}
+
+	exp.Body = p.parseBlockStatement()
+
+	return exp
 }
 
 func (p *Parser) parseHashLiteral() ast.Expression {
@@ -445,33 +506,32 @@ func (p *Parser) parseIfExpression() ast.Expression {
 	}
 
 	exp.Consequence = p.parseBlockStatement()
-	
-	for p.peekTokenIs(token.ELSE_IF){
+
+	for p.peekTokenIs(token.ELSE_IF) {
 		p.nextToken()
-		
-		if !p.expectPeek(token.LPAREN){
+
+		if !p.expectPeek(token.LPAREN) {
 			return nil
 		}
-		
+
 		p.nextToken()
-		
+
 		condition := p.parseExpression(LOWEST)
-		
-		if !p.expectPeek(token.RPAREN){
+
+		if !p.expectPeek(token.RPAREN) {
 			return nil
 		}
-		if !p.expectPeek(token.LBRACE){
+		if !p.expectPeek(token.LBRACE) {
 			return nil
 		}
-		
+
 		consequence := p.parseBlockStatement()
-		
+
 		exp.IfElse = append(exp.IfElse, &ast.ELSE_IF{
-			Condition: condition,
+			Condition:   condition,
 			Consequence: consequence,
 		})
 	}
-	
 
 	if p.peekTokenIs(token.ELSE) {
 		p.nextToken()
