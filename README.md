@@ -36,11 +36,23 @@ Code-Lang is a modern, interpreted programming language written in Go. It began 
 
 ### Installation
 
-Clone the repository:
+#### Option 1: Using `go install` (Recommended)
+You can install the **code-lang** binary directly to your `$GOPATH/bin`:
+
+```bash
+go install github.com/walonCode/code-lang@latest
+```
+
+#### Option 2: Pre-built Binaries
+Head over to the [Releases](https://github.com/walonCode/code-lang/releases) section to download path-ready binaries for Windows, macOS, and Linux.
+
+#### Option 3: From Source
+Clone and build manually:
 
 ```bash
 git clone https://github.com/walonCode/code-lang.git
 cd code-lang
+go build -o code-lang main.go
 ```
 
 ### Running the REPL
