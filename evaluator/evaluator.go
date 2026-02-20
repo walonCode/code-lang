@@ -129,9 +129,23 @@ func evalIndexExpression(left, index object.Object, node *ast.IndexExpression) o
 		return evalArrayIndexExpression(left, index)
 	case left.Type() == object.HASH_OBJ:
 		return evalHashIndexExpression(left, index, node)
+	case left.Type() == object.STRING_OBJ && index.Type() == object.INTEGER_OBJ:
+		return evalStringIndexExpression(left, index)
 	default:
 		return object.NewError(node.Line(), node.Column(),"index operator not supported: %s", left.Type())
 	}
+}
+
+func evalStringIndexExpression(left,index object.Object)object.Object{
+	strObject := left.(*object.String)
+	idx := index.(*object.Integer).Value
+	max := int64(len(strObject.Value))
+	
+	if idx < 0 || idx > max {
+		return object.NULL
+	}
+	
+	return &object.String{Value: string(strObject.Value[idx])}
 }
 
 func evalHashIndexExpression(hash, index object.Object, node *ast.IndexExpression)object.Object{
