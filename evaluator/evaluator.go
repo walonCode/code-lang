@@ -271,11 +271,23 @@ func evalIfExpression(node *ast.IfExpression, env object.Environment) object.Obj
 
 	if isTruthy(condition) {
 		return Eval(node.Consequence, &env)
-	} else if node.Alternative != nil {
-		return Eval(node.Alternative, &env)
-	} else {
-		return object.NULL
 	}
+
+	for _, v := range node.IfElse {
+		condition := Eval(v.Condition, &env)
+		if isError(condition){
+			return condition
+		}
+		if isTruthy(condition){
+			return Eval(v.Consequence, &env)
+		}
+	}
+
+	if node.Alternative != nil {
+		return Eval(node.Alternative, &env)
+	}
+
+	return object.NULL
 }
 
 func isTruthy(obj object.Object) bool {

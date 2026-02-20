@@ -205,6 +205,7 @@ type ELSE_IF struct {
 	Consequence *BlockStatement
 }
 
+
 type IfExpression struct {
 	Token       token.Token
 	Condition   Expression
@@ -223,7 +224,14 @@ func (i *IfExpression) String() string {
 	out.WriteString(i.Condition.String())
 	out.WriteString(" ")
 	out.WriteString(i.Consequence.String())
-
+	
+	for _,v := range i.IfElse{
+		out.WriteString("elseif")
+		out.WriteString(v.Condition.String())
+		out.WriteString("")
+		out.WriteString(v.Consequence.String())
+	}
+	
 	if i.Alternative != nil {
 		out.WriteString("else")
 		out.WriteString(i.Alternative.String())

@@ -139,7 +139,7 @@ func TestBangOperator(t *testing.T) {
 	}
 }
 
-func TestIfElseExpression(t *testing.T) {
+func TestIfElseifExpression(t *testing.T) {
 	tests := []struct {
 		input  string
 		expect any
@@ -151,6 +151,9 @@ func TestIfElseExpression(t *testing.T) {
 		{"if (1 > 2) { 10; };", nil},
 		{"if (1 > 2) { 10;} else { 20; };", 20},
 		{"if (1 < 2) { 10; } else { 20; };", 10},
+		{"if (1 < 2) { 10; } elseif (1 > 2) { 20; };", 10},
+		{"if (1 > 2) { 10; } elseif (1 < 2) { 20; };", 20},
+		{"if (1 > 2) { 10; } elseif (1 < 2) { 20; } else { 30; };", 20},
 	}
 
 	for _, tt := range tests {
