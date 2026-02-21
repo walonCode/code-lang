@@ -20,12 +20,13 @@ Code-Lang is a modern, interpreted programming language written in Go. It began 
   - `if-elseif-else` expressions (everything is an expression!).
   - `while` loops for simple iteration.
   - `for` loops for structured iteration.
+- **Support for Comments:** Single-line (`#`) and multi-line (`/* */`).
 - **Standard Operators:**
   - Arithmetic: `+`, `-`, `*`, `/`, `%` (Modulo)
   - Advanced: `**` (Power), `//` (Floor Division), `=` (Assignment)
   - Comparison: `==`, `!=`, `<`, `>`, `<=`, `>=`
   - Logical: `!` (Negation)
-- **Built-in Functions:** `print`, `len`, `first`, `last`, `rest`, `push`, and more.
+- **Built-in Functions:** `print`, `printf`, `typeof`, `len`, `push`, and more.
 - **REPL:** Interactive shell with precise line/column error tracking.
 - **File Execution:** Run scripts with the `.cl` extension.
 
@@ -131,6 +132,25 @@ for (let j = 0; j < 5; j = j + 1) {
 };
 ```
 
+### Advanced Features
+
+```rust
+// Comments
+# This is a single line comment
+/* 
+   This is a 
+   multi-line comment 
+*/
+
+// Formatted print
+let name = "Alice";
+printf("Hello, %s!", name);
+
+// Type checking
+print(typeof(10)); // Output: INTEGER
+print(typeof("hi")); // Output: STRING
+```
+
 ---
 
 ## 🗺 Roadmap
@@ -138,7 +158,7 @@ for (let j = 0; j < 5; j = j + 1) {
 We are constantly working to make Code-Lang better. Here is what's coming next:
 
 - [x] **Better Error Reporting:** Line and column tracking for precise debugging.
-- [ ] **Comments:** Support for single and multi-line comments.
+- [x] **Comments:** Support for single and multi-line comments.
 - [x] **Loops:** Implementing `while` and `for` loops.
 - [ ] **Logical Operators:** Adding `&&` (AND) and `||` (OR) with short-circuiting.
 - [ ] **Standard Library:** Dedicated modules for `math`, `fs`, and `http`.

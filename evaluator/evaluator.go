@@ -2,6 +2,7 @@ package evaluator
 
 import (
 	"math"
+	"strings"
 
 	"github.com/walonCode/code-lang/ast"
 	"github.com/walonCode/code-lang/object"
@@ -400,6 +401,10 @@ func evalInfixExpression(node *ast.InfixExpression, left, right object.Object) o
 		return evalIntegerInfixExpression(node, left, right)
 	case left.Type() == object.FLOAT_OBJ && right.Type() == object.FLOAT_OBJ:
 		return evalFloatInfixExpression(node, left, right)
+	case left.Type() == object.INTEGER_OBJ && right.Type() == object.FLOAT_OBJ:
+		return evalFloatAndIntegerInfixExpression(node, left, right)
+	case left.Type() == object.FLOAT_OBJ && right.Type() == object.INTEGER_OBJ:
+		return evalFloatAndIntegerInfixExpression(node, left, right)
 	case node.Operator == "==":
 		return nativeBoolToBooleanObject(left == right)
 	case node.Operator == "!=":
@@ -410,6 +415,59 @@ func evalInfixExpression(node *ast.InfixExpression, left, right object.Object) o
 		return evalCharInfixExpression(node, left, right)
 	case isStringOrChar(left) && isStringOrChar(right):
 		return evalMixedStringOrCharInfixExpression(node, left, right)
+	default:
+		return object.NewError(node.Line(), node.Column(), "unknown operator: %s %s %s", left.Type(), node.Operator, right.Type())
+	}
+}
+
+func evalFloatAndIntegerInfixExpression(node *ast.InfixExpression, left, right object.Object) object.Object {
+	var leftVal float64
+	var rightVal float64
+
+	if left.Type() == object.INTEGER_OBJ {
+		leftVal = float64(left.(*object.Integer).Value)
+	} else {
+		leftVal = left.(*object.Float).Value
+	}
+
+	if right.Type() == object.INTEGER_OBJ {
+		rightVal = float64(right.(*object.Integer).Value)
+	} else {
+		rightVal = right.(*object.Float).Value
+	}
+
+	switch node.Operator {
+	case "+":
+		return &object.Float{Value: leftVal + rightVal}
+	case "-":
+		return &object.Float{Value: leftVal - rightVal}
+	case "*":
+		return &object.Float{Value: leftVal * rightVal}
+	case "/":
+		if rightVal == 0 {
+			return object.NewError(node.Line(), node.Column(), "division by zero: %f / %f", leftVal, rightVal)
+		}
+		return &object.Float{Value: leftVal / rightVal}
+	case "**":
+		return &object.Float{Value: (math.Pow(float64(leftVal), float64(rightVal)))}
+	case "//":
+		if rightVal == 0 {
+			return object.NewError(node.Line(), node.Column(), "division by zero: %f // %f", leftVal, rightVal)
+		}
+		return &object.Float{Value: (math.Floor(float64(leftVal) / float64(rightVal)))}
+	case "%":
+		if rightVal == 0 {
+			return object.NewError(node.Line(), node.Column(), "division by zero: %f %% %f", leftVal, rightVal)
+		}
+		return &object.Float{Value: (math.Mod(float64(leftVal), float64(rightVal)))}
+	case "<":
+		return nativeBoolToBooleanObject(leftVal < rightVal)
+	case "<=":
+		return nativeBoolToBooleanObject(leftVal <= rightVal)
+	case ">":
+		return nativeBoolToBooleanObject(leftVal > rightVal)
+	case ">=":
+		return nativeBoolToBooleanObject(leftVal >= rightVal)
 	default:
 		return object.NewError(node.Line(), node.Column(), "unknown operator: %s %s %s", left.Type(), node.Operator, right.Type())
 	}
@@ -427,12 +485,21 @@ func evalFloatInfixExpression(node *ast.InfixExpression, left, right object.Obje
 	case "*":
 		return &object.Float{Value: leftVal * rightVal}
 	case "/":
+		if rightVal == 0 {
+			return object.NewError(node.Line(), node.Column(), "division by zero: %f / %f", leftVal, rightVal)
+		}
 		return &object.Float{Value: leftVal / rightVal}
 	case "**":
 		return &object.Float{Value: (math.Pow(float64(leftVal), float64(rightVal)))}
 	case "//":
+		if rightVal == 0 {
+			return object.NewError(node.Line(), node.Column(), "division by zero: %f // %f", leftVal, rightVal)
+		}
 		return &object.Float{Value: (math.Floor(float64(leftVal) / float64(rightVal)))}
 	case "%":
+		if rightVal == 0 {
+			return object.NewError(node.Line(), node.Column(), "division by zero: %f %% %f", leftVal, rightVal)
+		}
 		return &object.Float{Value: (math.Mod(float64(leftVal), float64(rightVal)))}
 	case "<":
 		return nativeBoolToBooleanObject(leftVal < rightVal)
@@ -447,7 +514,7 @@ func evalFloatInfixExpression(node *ast.InfixExpression, left, right object.Obje
 	case ">=":
 		return nativeBoolToBooleanObject(leftVal >= rightVal)
 	default:
-		return object.NewError(node.Line(), node.Column(), "unknown operator: %s %s %s", left.Type(), node.Operator, right.Type())
+		return object.NewError(node.Line(), node.Column(), "unknown operator: %s %s %s", strings.ToLower(string(left.Type())), node.Operator, strings.ToLower(string(right.Type())))
 	}
 }
 
@@ -496,12 +563,21 @@ func evalIntegerInfixExpression(node *ast.InfixExpression, left, right object.Ob
 	case "*":
 		return &object.Integer{Value: leftVal * rightVal}
 	case "/":
+		if rightVal == 0 {
+			return object.NewError(node.Line(), node.Column(), "division by zero: %d / %d", leftVal, rightVal)
+		}
 		return &object.Integer{Value: leftVal / rightVal}
 	case "**":
 		return &object.Integer{Value: int64(math.Pow(float64(leftVal), float64(rightVal)))}
 	case "//":
+		if rightVal == 0 {
+			return object.NewError(node.Line(), node.Column(), "division by zero: %d // %d", leftVal, rightVal)
+		}
 		return &object.Integer{Value: int64(math.Floor(float64(leftVal) / float64(rightVal)))}
 	case "%":
+		if rightVal == 0 {
+			return object.NewError(node.Line(), node.Column(), "division by zero: %d %% %d", leftVal, rightVal)
+		}
 		return &object.Integer{Value: int64(math.Mod(float64(leftVal), float64(rightVal)))}
 	case "<":
 		return nativeBoolToBooleanObject(leftVal < rightVal)
