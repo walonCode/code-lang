@@ -34,6 +34,7 @@ var GeneralBuiltins = map[string]*object.Builtin{
 						fmt.Print(" ")
 					}
 				}
+				fmt.Println()
 			return nil
 		},
 	},

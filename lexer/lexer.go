@@ -185,7 +185,7 @@ func (l *Lexer)skipMultiLneComment(){
 			break
 		}
 		
-		if l.ch == '/' && l.peakChar() == '*'{
+		if l.ch == '*' && l.peakChar() == '/'{
 			l.readChar()
 			l.readChar()
 			break
