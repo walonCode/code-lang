@@ -16,14 +16,17 @@ Code-Lang is a modern, interpreted programming language written in Go. It began 
   - Arrays (e.g., `[1, 2, 3]`)
   - Hashes/Dictionaries (e.g., `{"name": "Code-Lang"}`)
 - **First-Class Functions:** Function literals, closures, and higher-order functions.
-- **Control Flow:** `if-else` expressions (everything is an expression!).
+- **Control Flow:**
+  - `if-elseif-else` expressions (everything is an expression!).
+  - `while` loops for simple iteration.
+  - `for` loops for structured iteration.
 - **Standard Operators:**
-  - Arithmetic: `+`, `-`, `*`, `/`, `%`
-  - Advanced: `**` (Power), `//` (Floor Division)
+  - Arithmetic: `+`, `-`, `*`, `/`, `%` (Modulo)
+  - Advanced: `**` (Power), `//` (Floor Division), `=` (Assignment)
   - Comparison: `==`, `!=`, `<`, `>`, `<=`, `>=`
   - Logical: `!` (Negation)
 - **Built-in Functions:** `print`, `len`, `first`, `last`, `rest`, `push`, and more.
-- **REPL:** Interactive shell with a friendly greet.
+- **REPL:** Interactive shell with precise line/column error tracking.
 - **File Execution:** Run scripts with the `.cl` extension.
 
 ---
@@ -103,10 +106,28 @@ let person = {"name": "Alice", "age": 30};
 
 ```rust
 let x = 10;
-let result = if (x > 5) {
+let result = if (x > 10) {
     "Greater"
+} elseif (x == 10) {
+    "Equal"
 } else {
-    "Smaller or Equal"
+    "Smaller"
+};
+```
+
+### Loops
+
+```rust
+// While loop
+let i = 0;
+while (i < 5) {
+    print(i);
+    i = i + 1;
+};
+
+// For loop
+for (let j = 0; j < 5; j = j + 1) {
+    print(j);
 };
 ```
 
@@ -116,9 +137,9 @@ let result = if (x > 5) {
 
 We are constantly working to make Code-Lang better. Here is what's coming next:
 
-- [ ] **Better Error Reporting:** Line and column tracking for precise debugging.
-- [ ] **Comments:** Support for `//` and `/* */`.
-- [ ] **Loops:** Implementing `while` and `for` loops.
+- [x] **Better Error Reporting:** Line and column tracking for precise debugging.
+- [ ] **Comments:** Support for single and multi-line comments.
+- [x] **Loops:** Implementing `while` and `for` loops.
 - [ ] **Logical Operators:** Adding `&&` (AND) and `||` (OR) with short-circuiting.
 - [ ] **Standard Library:** Dedicated modules for `math`, `fs`, and `http`.
 - [ ] **Import System:** Ability to include other `.cl` files.
