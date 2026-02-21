@@ -120,30 +120,30 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 	return nil
 }
 
-func evalWhileExpression(node *ast.WhileExpression, env *object.Environment)object.Object{
+func evalWhileExpression(node *ast.WhileExpression, env *object.Environment) object.Object {
 	var result object.Object = object.NULL
-	
+
 	for {
 		if node.Condition != nil {
-			condition := Eval(node.Condition,env)
-			if isError(condition){
+			condition := Eval(node.Condition, env)
+			if isError(condition) {
 				return condition
 			}
-			
-			if !isTruthy(condition){
+
+			if !isTruthy(condition) {
 				break
 			}
 		}
-		
+
 		result = Eval(node.Body, env)
 		if result != nil {
 			rt := result.Type()
-			if rt == object.RETURN_VALUE_OBJ || rt == object.ERROR_OBJ{
+			if rt == object.RETURN_VALUE_OBJ || rt == object.ERROR_OBJ {
 				return result
 			}
 		}
 	}
-	
+
 	return result
 }
 
@@ -460,6 +460,29 @@ func evalFloatAndIntegerInfixExpression(node *ast.InfixExpression, left, right o
 			return object.NewError(node.Line(), node.Column(), "division by zero: %f %% %f", leftVal, rightVal)
 		}
 		return &object.Float{Value: (math.Mod(float64(leftVal), float64(rightVal)))}
+	case "+=":
+		return &object.Float{Value: leftVal + rightVal}
+	case "-=":
+		return &object.Float{Value: leftVal - rightVal}
+	case "*=":
+		return &object.Float{Value: leftVal * rightVal}
+	case "/=":
+		if rightVal == 0 {
+			return object.NewError(node.Line(), node.Column(), "division by zero: %f / %f", leftVal, rightVal)
+		}
+		return &object.Float{Value: leftVal / rightVal}
+	case "**=":
+		return &object.Float{Value: (math.Pow(float64(leftVal), float64(rightVal)))}
+	case "//=":
+		if rightVal == 0 {
+			return object.NewError(node.Line(), node.Column(), "division by zero: %f // %f", leftVal, rightVal)
+		}
+		return &object.Float{Value: (math.Floor(float64(leftVal) / float64(rightVal)))}
+	case "%=":
+		if rightVal == 0 {
+			return object.NewError(node.Line(), node.Column(), "division by zero: %f %% %f", leftVal, rightVal)
+		}
+		return &object.Float{Value: (math.Mod(float64(leftVal), float64(rightVal)))}
 	case "<":
 		return nativeBoolToBooleanObject(leftVal < rightVal)
 	case "<=":
@@ -497,6 +520,29 @@ func evalFloatInfixExpression(node *ast.InfixExpression, left, right object.Obje
 		}
 		return &object.Float{Value: (math.Floor(float64(leftVal) / float64(rightVal)))}
 	case "%":
+		if rightVal == 0 {
+			return object.NewError(node.Line(), node.Column(), "division by zero: %f %% %f", leftVal, rightVal)
+		}
+		return &object.Float{Value: (math.Mod(float64(leftVal), float64(rightVal)))}
+	case "+=":
+		return &object.Float{Value: leftVal + rightVal}
+	case "-=":
+		return &object.Float{Value: leftVal - rightVal}
+	case "*=":
+		return &object.Float{Value: leftVal * rightVal}
+	case "/=":
+		if rightVal == 0 {
+			return object.NewError(node.Line(), node.Column(), "division by zero: %f / %f", leftVal, rightVal)
+		}
+		return &object.Float{Value: leftVal / rightVal}
+	case "**=":
+		return &object.Float{Value: (math.Pow(float64(leftVal), float64(rightVal)))}
+	case "//=":
+		if rightVal == 0 {
+			return object.NewError(node.Line(), node.Column(), "division by zero: %f // %f", leftVal, rightVal)
+		}
+		return &object.Float{Value: (math.Floor(float64(leftVal) / float64(rightVal)))}
+	case "%=":
 		if rightVal == 0 {
 			return object.NewError(node.Line(), node.Column(), "division by zero: %f %% %f", leftVal, rightVal)
 		}
@@ -575,6 +621,29 @@ func evalIntegerInfixExpression(node *ast.InfixExpression, left, right object.Ob
 		}
 		return &object.Integer{Value: int64(math.Floor(float64(leftVal) / float64(rightVal)))}
 	case "%":
+		if rightVal == 0 {
+			return object.NewError(node.Line(), node.Column(), "division by zero: %d %% %d", leftVal, rightVal)
+		}
+		return &object.Integer{Value: int64(math.Mod(float64(leftVal), float64(rightVal)))}
+	case "+=":
+		return &object.Integer{Value: leftVal + rightVal}
+	case "-=":
+		return &object.Integer{Value: leftVal - rightVal}
+	case "*=":
+		return &object.Integer{Value: leftVal * rightVal}
+	case "/=":
+		if rightVal == 0 {
+			return object.NewError(node.Line(), node.Column(), "division by zero: %d / %d", leftVal, rightVal)
+		}
+		return &object.Integer{Value: leftVal / rightVal}
+	case "**=":
+		return &object.Integer{Value: int64(math.Pow(float64(leftVal), float64(rightVal)))}
+	case "//=":
+		if rightVal == 0 {
+			return object.NewError(node.Line(), node.Column(), "division by zero: %d // %d", leftVal, rightVal)
+		}
+		return &object.Integer{Value: int64(math.Floor(float64(leftVal) / float64(rightVal)))}
+	case "%=":
 		if rightVal == 0 {
 			return object.NewError(node.Line(), node.Column(), "division by zero: %d %% %d", leftVal, rightVal)
 		}
