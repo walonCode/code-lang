@@ -25,6 +25,12 @@ const (
 	BANG = "!"
 	ASTERISK = "*"
 	
+	ADD_ASSIGN = "+="
+	SUB_ASSIGN = "-="
+	MUL_ASSIGN = "*="
+	QUO_ASSIGN = "/="
+	REM_ASSIGN = "%="
+	
 	REM = "%"
 	SQUARE = "**"
 	FLOOR = "//"
@@ -36,6 +42,7 @@ const (
 	LESS_THAN_EQUAL = "<="
 	EQ = "=="
 	NOT_EQ = "!="
+
 	// Delimiters
 	COMMA = ","
 	SEMICOLON = ";"

@@ -60,13 +60,25 @@ func (l *Lexer) NextToken() token.Token {
 	case ')':
 		tok = newToken(token.RPAREN, l.ch, currentLine, currentColumn)
 	case '+':
-		tok = newToken(token.PLUS, l.ch, currentLine, currentColumn)
+		if l.peakChar() == '='{
+			ch := l.ch
+			l.readChar()
+			tok = token.Token{Type:token.ADD_ASSIGN, Literal: string(ch) + string(l.ch), Line: currentLine, Column: currentColumn}
+		}else{
+			tok = newToken(token.PLUS, l.ch, currentLine, currentColumn)
+		}
 	case '{':
 		tok = newToken(token.LBRACE, l.ch, currentLine, currentColumn)
 	case '}':
 		tok = newToken(token.RBRACE, l.ch, currentLine, currentColumn)
 	case '-':
-		tok = newToken(token.MINUS, l.ch, currentLine, currentColumn)
+		if l.peakChar() == '=' {
+			ch := l.ch
+			l.readChar()
+			tok = token.Token{Type: token.SUB_ASSIGN, Literal: string(ch) + string(l.ch), Column: currentColumn, Line: currentLine}
+		}else{
+			tok = newToken(token.MINUS, l.ch, currentLine, currentColumn)
+		}
 	case '[':
 		tok = newToken(token.LBRACKET, l.ch, currentLine, currentColumn)
 	case ']':
@@ -92,6 +104,10 @@ func (l *Lexer) NextToken() token.Token {
 			l.readChar()
 			l.skipMultiLneComment()
 			return l.NextToken()
+		}else if l.peakChar() == '='{
+			ch := l.ch
+			l.readChar()
+			tok = token.Token{Type: token.QUO_ASSIGN, Literal: string(ch) + string(l.ch), Line: currentLine, Column: currentColumn}
 		} else {
 			tok = newToken(token.SLASH, l.ch, currentLine, currentColumn)
 		}
@@ -100,6 +116,10 @@ func (l *Lexer) NextToken() token.Token {
 			ch := l.ch
 			l.readChar()
 			tok = token.Token{Type: token.SQUARE, Literal: string(ch) + string(l.ch), Line: currentLine, Column: currentColumn}
+		}else if l.peakChar() == '=' {
+			ch := l.ch
+			l.readChar()
+			tok = token.Token{Type: token.MUL_ASSIGN, Literal: string(ch) + string(l.ch), Column: currentColumn, Line: currentLine}
 		} else {
 			tok = newToken(token.ASTERISK, l.ch, currentLine, currentColumn)
 		}
@@ -122,7 +142,13 @@ func (l *Lexer) NextToken() token.Token {
 	case ';':
 		tok = newToken(token.SEMICOLON, l.ch, currentLine, currentColumn)
 	case '%':
-		tok = newToken(token.REM, l.ch, currentLine, currentColumn)
+		if l.peakChar() == '='{
+			ch := l.ch
+			l.readChar()
+			tok = token.Token{Type: token.REM_ASSIGN, Literal: string(ch) + string(l.ch), Line: currentLine, Column: currentColumn}
+		}else {
+			tok = newToken(token.REM, l.ch, currentLine, currentColumn)
+		}
 	case ',':
 		tok = newToken(token.COMMA, l.ch, currentLine, currentColumn)
 	case '"':
