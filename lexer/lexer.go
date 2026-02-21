@@ -72,7 +72,8 @@ func (l *Lexer) NextToken() token.Token {
 	case ']':
 		tok = newToken(token.RBRACKET, l.ch, currentLine, currentColumn)
 	case '#':
-		tok = newToken(token.COMMENT, l.ch, currentLine, currentColumn)
+		l.skipSingleLineComment()
+		return l.NextToken()
 	case '!':
 		if l.peakChar() == '=' {
 			ch := l.ch
@@ -87,9 +88,10 @@ func (l *Lexer) NextToken() token.Token {
 			l.readChar()
 			tok = token.Token{Type: token.FLOOR, Literal: string(ch) + string(l.ch), Line: currentLine, Column: currentColumn}
 		}else if l.peakChar() == '*' {
-			ch := l.ch
 			l.readChar()
-			tok = token.Token{Type: token.MULTI_COMMENT_START, Literal: string(ch) + string(l.ch), Line: currentLine, Column: currentColumn}
+			l.readChar()
+			l.skipMultiLneComment()
+			return l.NextToken()
 		} else {
 			tok = newToken(token.SLASH, l.ch, currentLine, currentColumn)
 		}
@@ -169,6 +171,28 @@ func (l *Lexer) NextToken() token.Token {
 
 	l.readChar()
 	return tok
+}
+
+func(l *Lexer)skipSingleLineComment(){
+	for l.ch != '\n' && l.ch != 0 {
+		l.readChar()
+	}
+}
+
+func (l *Lexer)skipMultiLneComment(){
+	for {
+		if l.ch == 0 {
+			break
+		}
+		
+		if l.ch == '/' && l.peakChar() == '*'{
+			l.readChar()
+			l.readChar()
+			break
+		}
+		
+		l.readChar()
+	}
 }
 
 func (l *Lexer) readCharType() string {

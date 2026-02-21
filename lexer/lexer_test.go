@@ -47,7 +47,7 @@ func TestNextToken(t *testing.T){
 	break
 	continue
 	#
-	/*
+	/* */
 	`
 	
 	test := []struct{
@@ -165,8 +165,6 @@ func TestNextToken(t *testing.T){
 		{token.WHILE, "while"},
 		{token.BREAK, "break"},
 		{token.CONTINUE, "continue"},
-		{token.COMMENT, "#"},
-		{token.MULTI_COMMENT_START, "/*"},
 		{token.EOF, ""},
 	}
 	
