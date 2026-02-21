@@ -32,8 +32,13 @@ var precendeces = map[token.TokenType]int{
 	token.LESS_THAN_EQUAL:    LESSGREATER,
 	token.PLUS:               SUM,
 	token.MINUS:              SUM,
+	token.ADD_ASSIGN:         SUM,
+	token.SUB_ASSIGN:         SUM,
 	token.SLASH:              PRODUCT,
 	token.ASTERISK:           PRODUCT,
+	token.MUL_ASSIGN:         PRODUCT,
+	token.REM_ASSIGN:         PRODUCT,
+	token.QUO_ASSIGN:         PRODUCT,
 	token.FLOOR:              PRODUCT,
 	token.REM:                PRODUCT,
 	token.SQUARE:             PRODUCT,
@@ -294,33 +299,38 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.GT, p.parseInfixExpression)
 	p.registerInfix(token.GREATER_THAN_EQUAL, p.parseInfixExpression)
 	p.registerInfix(token.LESS_THAN_EQUAL, p.parseInfixExpression)
+	p.registerInfix(token.REM_ASSIGN, p.parseInfixExpression)
+	p.registerInfix(token.QUO_ASSIGN, p.parseInfixExpression)
+	p.registerInfix(token.ADD_ASSIGN, p.parseInfixExpression)
+	p.registerInfix(token.SUB_ASSIGN, p.parseInfixExpression)
+	p.registerInfix(token.MUL_ASSIGN, p.parseInfixExpression)
 	p.registerInfix(token.LPAREN, p.parseCallExpression)
 	p.registerInfix(token.LBRACKET, p.parseIndexExpression)
 	p.registerInfix(token.ASSIGN, p.parseInfixExpression)
 	return p
 }
 
-func(p *Parser)parseWhileExpression()ast.Expression{
+func (p *Parser) parseWhileExpression() ast.Expression {
 	exp := &ast.WhileExpression{Token: p.curToken}
-	
-	if !p.expectPeek(token.LPAREN){
+
+	if !p.expectPeek(token.LPAREN) {
 		return nil
 	}
-	
+
 	p.nextToken()
-	
+
 	exp.Condition = p.parseExpression(LOWEST)
-	
-	if !p.expectPeek(token.RPAREN){
+
+	if !p.expectPeek(token.RPAREN) {
 		return nil
 	}
-	
-	if !p.expectPeek(token.LBRACE){
+
+	if !p.expectPeek(token.LBRACE) {
 		return nil
 	}
-	
+
 	exp.Body = p.parseBlockStatement()
-	
+
 	return exp
 }
 

@@ -213,6 +213,11 @@ func TestParsingInfixExpressions(t *testing.T) {
 		{"true == true;", true, "==", true},
 		{"true != false;", true, "!=", false},
 		{"false == false;", false, "==", false},
+		{"5 += 5;", 5, "+=", 5},
+		{"5 -= 5;", 5, "-=", 5},
+		{"5 *= 5;", 5, "*=", 5},
+		{"5 /= 5;", 5, "/=", 5},
+		{"5 %= 5;", 5, "%=", 5},
 	}
 
 	for _, tt := range infixTests {
@@ -1122,7 +1127,6 @@ func TestForExpression(t *testing.T) {
 	}
 }
 
-
 func TestWhileExpression(t *testing.T) {
 	input := `while (x < y) { x; };`
 
@@ -1147,14 +1151,12 @@ func TestWhileExpression(t *testing.T) {
 		t.Fatalf("exp is not ast.WhileExpression. got=%T", stmt.Expression)
 	}
 
-
 	if !testInfixExpression(t, whileExp.Condition, "x", "<", "y") {
 		return
 	}
 
-
 	if len(whileExp.Body.Statements) != 1 {
-		t.Errorf("whileExp.Body.Statements has wrong length. got=%d", 
+		t.Errorf("whileExp.Body.Statements has wrong length. got=%d",
 			len(whileExp.Body.Statements))
 	}
 
