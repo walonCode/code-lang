@@ -2,6 +2,7 @@ package general
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/walonCode/code-lang/ast"
 	"github.com/walonCode/code-lang/object"
@@ -27,28 +28,29 @@ func unwrapObject(obj object.Object)any {
 var GeneralBuiltins = map[string]*object.Builtin{
 	"print": {
 		Fn: func(node *ast.CallExpression, args ...object.Object) object.Object {
-
-			if len(args) == 0 {
-				fmt.Println()
-				return nil
-			}
-
-			formatStr, isFormat := args[0].(*object.String)
-
-			if isFormat && len(args) > 1 {
-				goArgs := make([]any, len(args) -1 )
-				for i, arg := range args[1:] {
-					goArgs[i] = unwrapObject(arg)
-				}
-				fmt.Printf(formatStr.Value, goArgs...)
-				fmt.Println()
-			}else {
 				for i, value := range args {
 					fmt.Print(value.Inspect())
 					if i < len(args) - 1 {
 						fmt.Print(" ")
 					}
 				}
+			return nil
+		},
+	},
+	"printf": {
+		Fn: func(node *ast.CallExpression, args ...object.Object) object.Object {
+			if len(args) < 2 {
+				return nil
+			}
+
+			formatStr, isFormat := args[0].(*object.String)
+
+			if isFormat && len(args) > 1 && strings.Contains(formatStr.Value, "%") {
+				goArgs := make([]any, len(args) -1 )
+				for i, arg := range args[1:] {
+					goArgs[i] = unwrapObject(arg)
+				}
+				fmt.Printf(formatStr.Value, goArgs...)
 				fmt.Println()
 			}
 			return nil
