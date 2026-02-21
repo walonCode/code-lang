@@ -1,10 +1,12 @@
 package repl
 
 import (
-	"bufio"
 	"fmt"
 	"io"
+	"os"
+	"path/filepath"
 
+	"github.com/chzyer/readline"
 	"github.com/walonCode/code-lang/evaluator"
 	"github.com/walonCode/code-lang/lexer"
 	"github.com/walonCode/code-lang/object"
@@ -13,23 +15,41 @@ import (
 
 const PROMPT = ">> "
 
-func Start(in io.Reader, out io.Writer){
-	scanner := bufio.NewScanner(in)
+func Start(out io.Writer){
 	env := object.NewEnvironment()
+
+	home,_ := os.UserHomeDir()
+	historyPath := filepath.Join(home, ".code_lang_history")
+
+	r1, err := readline.NewEx(&readline.Config{
+		Prompt: PROMPT,
+		HistoryFile: historyPath,
+		InterruptPrompt: "^C",
+	})
+
+	if err != nil {
+		panic(err)
+	}
+
+	defer r1.Close()
 	
 	for {
-		fmt.Printf(PROMPT)
-		scanned := scanner.Scan()
+		line, err := r1.Readline()
 		
-		if !scanned {
-			return
+		if err == readline.ErrInterrupt {
+			fmt.Println("Exiting...")
+			break
 		}
 		
-		line := scanner.Text()
+		if line == "exit()"{
+			fmt.Println("Exiting...")
+			os.Exit(0)
+		}
 		
 		l := lexer.New(line)
 		p := parser.New(l)
 		
+
 		programe := p.ParsePrograme()
 		if len(p.Errors()) != 0 {
 			printParserError(out, p.Errors())

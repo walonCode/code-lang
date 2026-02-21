@@ -45,5 +45,5 @@ func runRepl(){
 	fmt.Printf("Hello %s! This is the Code-Lang Programming Language\n", usr.Username)
 	fmt.Printf("Feel free to start type in the commands\n")
 
-	repl.Start(os.Stdin, os.Stdout)
+	repl.Start(os.Stdout)
 }
