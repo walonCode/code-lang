@@ -71,6 +71,8 @@ func (l *Lexer) NextToken() token.Token {
 		tok = newToken(token.LBRACKET, l.ch, currentLine, currentColumn)
 	case ']':
 		tok = newToken(token.RBRACKET, l.ch, currentLine, currentColumn)
+	case '#':
+		tok = newToken(token.COMMENT, l.ch, currentLine, currentColumn)
 	case '!':
 		if l.peakChar() == '=' {
 			ch := l.ch
@@ -84,6 +86,10 @@ func (l *Lexer) NextToken() token.Token {
 			ch := l.ch
 			l.readChar()
 			tok = token.Token{Type: token.FLOOR, Literal: string(ch) + string(l.ch), Line: currentLine, Column: currentColumn}
+		}else if l.peakChar() == '*' {
+			ch := l.ch
+			l.readChar()
+			tok = token.Token{Type: token.MULTI_COMMENT_START, Literal: string(ch) + string(l.ch), Line: currentLine, Column: currentColumn}
 		} else {
 			tok = newToken(token.SLASH, l.ch, currentLine, currentColumn)
 		}

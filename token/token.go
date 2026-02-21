@@ -59,6 +59,11 @@ const (
 	WHILE = "WHILE"
 	CONTINUE = "CONTINUE"
 	BREAK = "BREAK"
+	
+	//comment
+	COMMENT = "#"
+	MULTI_COMMENT_START = "/*"
+	MULTI_COMMENT_END = "*/"
 )
 
 var keywords = map[string]TokenType{
