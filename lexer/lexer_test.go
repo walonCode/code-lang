@@ -48,6 +48,11 @@ func TestNextToken(t *testing.T){
 	continue
 	#
 	/* */
+	+=
+	-=
+	*=
+	/=
+	%=
 	`
 	
 	test := []struct{
@@ -165,6 +170,11 @@ func TestNextToken(t *testing.T){
 		{token.WHILE, "while"},
 		{token.BREAK, "break"},
 		{token.CONTINUE, "continue"},
+		{token.ADD_ASSIGN, "+="},
+		{token.SUB_ASSIGN, "-="},
+		{token.MUL_ASSIGN, "*="},
+		{token.QUO_ASSIGN, "/="},
+		{token.REM_ASSIGN, "%="},
 		{token.EOF, ""},
 	}
 	
