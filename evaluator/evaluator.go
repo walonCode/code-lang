@@ -115,9 +115,29 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		return evalIndexExpression(left, index, node)
 	case *ast.HashLiteral:
 		return evalHashLiteral(node, env)
+	case *ast.MemberExpression:
+		obj := Eval(node.Object, env)
+		if isError(obj){
+			return obj
+		}
+		
+		return evalMemberExpression(obj, node)
 	}
 
 	return nil
+}
+
+func evalMemberExpression(obj object.Object, node *ast.MemberExpression)object.Object{
+	switch obj := obj.(type){
+		case *object.Hash:
+			key := &object.String{Value: node.Property.Value}
+			if val, ok := obj.Pairs[object.HashKey(key.HashKey())];ok {
+				return val.Value
+			}
+			return object.NewError(node.Line(), node.Column(), "property not found: %s", node.Property.Value)
+		default:
+			return object.NewError(node.Line(), node.Column(), "cannot access property %s on %s", node.Property.Value, obj.Type())
+	}
 }
 
 func evalWhileExpression(node *ast.WhileExpression, env *object.Environment) object.Object {
