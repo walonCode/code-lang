@@ -67,6 +67,9 @@ const (
 	CONTINUE = "CONTINUE"
 	BREAK = "BREAK"
 	
+	//class thing
+	DOT = "."
+	
 	//comment
 	COMMENT = "#"
 	MULTI_COMMENT_START = "/*"

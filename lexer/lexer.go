@@ -162,10 +162,14 @@ func (l *Lexer) NextToken() token.Token {
 		tok.Line = currentLine
 		tok.Column = currentColumn
 	case '.':
-		tok.Type = token.FLOAT
-		tok.Literal = l.readFloat()
-		tok.Line = currentLine
-		tok.Column = currentColumn
+		if isDigit(l.peakChar()){
+			tok.Type = token.FLOAT
+			tok.Literal = l.readFloat()
+			tok.Line = currentLine
+			tok.Column = currentColumn
+		}else {
+			tok = newToken(token.DOT, l.ch, currentLine, currentColumn)
+		}
 	case ':':
 		tok = newToken(token.COLON, l.ch, currentLine, currentColumn)
 	case 0:

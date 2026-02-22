@@ -53,6 +53,7 @@ func TestNextToken(t *testing.T){
 	*=
 	/=
 	%=
+	user.name
 	`
 	
 	test := []struct{
@@ -175,6 +176,9 @@ func TestNextToken(t *testing.T){
 		{token.MUL_ASSIGN, "*="},
 		{token.QUO_ASSIGN, "/="},
 		{token.REM_ASSIGN, "%="},
+		{token.IDENT,"user"},
+		{token.DOT, "."},
+		{token.IDENT, "name"},
 		{token.EOF, ""},
 	}
 	
