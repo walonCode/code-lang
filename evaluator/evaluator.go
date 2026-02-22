@@ -126,6 +126,7 @@ func evalImportStatement(node *ast.ImportStatement, env *object.Environment)obje
 	modulePath := node.Path
 	
 	if mod, ok := moduleCache[modulePath];ok {
+		env.Set(modulePath, mod)
 		return mod
 	}
 	
@@ -501,9 +502,6 @@ func evalExpression(exps []ast.Expression, env *object.Environment) []object.Obj
 func evalIdentifier(node *ast.Identifier, env *object.Environment) object.Object {
 	if val, ok := env.Get(node.Value); ok {
 		return val
-	}
-	if builtin, ok := builtins[node.Value]; ok {
-		return builtin
 	}
 	return object.NewError(node.Line(), node.Column(), "identifier not found: %s", node.Value)
 }

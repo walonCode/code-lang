@@ -1,16 +1,13 @@
 package evaluator
 
 import (
-	"maps"
-
-	"github.com/walonCode/code-lang/lib/arrays"
-	"github.com/walonCode/code-lang/lib/general"
-	"github.com/walonCode/code-lang/object"
+	"github.com/walonCode/code-lang/std/arrays"
+	"github.com/walonCode/code-lang/std/general"
 )
 
-var builtins = map[string]*object.Builtin{}
 
 func init() {
-	maps.Copy(builtins, general.GeneralBuiltins)
-	maps.Copy(builtins, arrays.ArrayBuiltins)
+    // preload standard library modules
+    moduleCache["arrays"]  = arrays.Module()
+    moduleCache["fmt"] = general.Module()
 }
