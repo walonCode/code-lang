@@ -1202,3 +1202,27 @@ func TestMemberExpression(t *testing.T){
 		t.Errorf("")
 	}
 }
+
+func TestImportStatement(t *testing.T){
+	input := `import "walon"; `
+	
+	l := lexer.New(input)
+	p := New(l)
+	programe := p.ParsePrograme()
+	checkParserErrors(t,p)
+	
+	if len(programe.Statements) != 1{
+		t.Errorf("")
+	}
+	
+	stmt := programe.Statements[0]
+	
+	imp, ok := stmt.(*ast.ImportStatement)
+	if !ok {
+		t.Errorf("")
+	}
+	
+	if imp.Path != "walon"{
+		t.Errorf("")
+	}
+}

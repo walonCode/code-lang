@@ -101,9 +101,27 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseLetStatement()
 	case token.RETURN:
 		return p.parseReturnStatement()
+	case token.IMPORT:
+		return p.parseImportStatement()	
 	default:
 		return p.parseExpressionStatement()
 	}
+}
+
+func (p *Parser) parseImportStatement() *ast.ImportStatement {
+	exp := &ast.ImportStatement{Token: p.curToken}
+	
+	if !p.expectPeek(token.STRING){
+		return nil
+	}
+	
+	exp.Path = p.curToken.Literal
+	
+	if !p.expectPeek(token.SEMICOLON){
+		return nil
+	}
+	
+	return exp
 }
 
 func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
@@ -312,6 +330,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.DOT, p.parseMemberExpression)
 	return p
 }
+
 
 func(p *Parser)parseMemberExpression(left ast.Expression)ast.Expression{
 	exp := &ast.MemberExpression{

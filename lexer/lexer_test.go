@@ -54,7 +54,7 @@ func TestNextToken(t *testing.T){
 	/=
 	%=
 	user.name
-	import
+	import "walon"
 	`
 	
 	test := []struct{
@@ -181,6 +181,7 @@ func TestNextToken(t *testing.T){
 		{token.DOT, "."},
 		{token.IDENT, "name"},
 		{token.IMPORT, "import"},
+		{token.STRING, "walon"},
 		{token.EOF, ""},
 	}
 	
