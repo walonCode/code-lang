@@ -47,21 +47,28 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		return evalPrefixExpression(node, right)
 	case *ast.InfixExpression:
 		if node.Operator == "=" {
-			val := Eval(node.Right, env)
-			if isError(val) {
-				return val
+			 if ident, ok := node.Left.(*ast.Identifier); ok {
+	            val := Eval(node.Right, env)
+	            if isError(val) {
+	                return val
+	            }
+	            env.Set(ident.Value, val)
+	            return val
+	        }
+			
+			if member, ok := node.Left.(*ast.MemberExpression); ok {
+				obj := Eval(member.Object, env)
+				if isError(obj){
+					return obj
+				}
+				
+				val := Eval(node.Right, env)
+				if isError(val){
+					return val
+				}
+				
+				return evalAssignMember(obj, member, val)
 			}
-
-			ident, ok := node.Left.(*ast.Identifier)
-			if !ok {
-				return object.NewError(node.Line(), node.Column(), "left side of assignment must be an identifier")
-			}
-
-			_, updated := env.Update(ident.Value, val)
-			if !updated {
-				env.Set(ident.Value, val)
-			}
-			return val
 		}
 
 		left := Eval(node.Left, env)
@@ -125,6 +132,21 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 	}
 
 	return nil
+}
+
+func evalAssignMember(obj object.Object, node *ast.MemberExpression, val object.Object)object.Object{
+	switch obj := obj.(type){
+		case *object.Hash:
+			key := &object.String{Value: node.Property.Value}
+			obj.Pairs[key.HashKey()] = object.HashPair{
+				Key: key,
+				Value:val,
+			}
+			
+			return val
+		default:
+			return object.NewError(node.Line(), node.Column(), "cannot assign to property %s on %s", node.Property.Value, obj.Type())
+	}
 }
 
 func evalMemberExpression(obj object.Object, node *ast.MemberExpression)object.Object{
