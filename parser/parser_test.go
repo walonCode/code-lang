@@ -1170,3 +1170,35 @@ func TestWhileExpression(t *testing.T) {
 		return
 	}
 }
+
+
+func TestMemberExpression(t *testing.T){
+	input := `foo.bar;`
+	
+	l := lexer.New(input)
+	p := New(l)
+	programe := p.ParsePrograme()
+	checkParserErrors(t, p)
+	
+	if len(programe.Statements) != 1 {
+		t.Errorf("")
+	}
+	
+	stmt, ok := programe.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Errorf("")
+	}
+	
+	member, ok := stmt.Expression.(*ast.MemberExpression)
+	if !ok {
+		t.Errorf("")
+	}
+	
+	if member.Object.String() != "foo" {
+		t.Errorf("")
+	}
+	
+	if member.Property.Value != "bar" {
+		t.Errorf("")
+	}
+}

@@ -470,3 +470,22 @@ func (w *WhileExpression) String() string {
 }
 func (w *WhileExpression) Line() int   { return w.Token.Line }
 func (w *WhileExpression) Column() int { return w.Token.Column }
+
+type MemberExpression struct {
+	Token token.Token
+	Object Expression
+	Property *Identifier
+}
+func (m *MemberExpression) expressionNode()      {}
+func (m *MemberExpression) TokenLiteral() string { return m.Token.Literal }
+func (m *MemberExpression) String() string {
+	var out bytes.Buffer
+	
+	out.WriteString(m.Object.String())
+	out.WriteString(".")
+	out.WriteString(m.Property.String())
+	
+	return out.String()
+}
+func (m *MemberExpression) Line() int   { return m.Token.Line }
+func (m *MemberExpression) Column() int { return m.Token.Column }

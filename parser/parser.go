@@ -20,6 +20,7 @@ const (
 	PREFIX      // -x or !x
 	CALL        //myfunction(x)
 	INDEX
+	MEMBER
 )
 
 var precendeces = map[token.TokenType]int{
@@ -44,6 +45,7 @@ var precendeces = map[token.TokenType]int{
 	token.SQUARE:             PRODUCT,
 	token.LPAREN:             CALL,
 	token.LBRACKET:           INDEX,
+	token.DOT: MEMBER,
 }
 
 func (p *Parser) peekPredences() int {
@@ -307,7 +309,26 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.LPAREN, p.parseCallExpression)
 	p.registerInfix(token.LBRACKET, p.parseIndexExpression)
 	p.registerInfix(token.ASSIGN, p.parseInfixExpression)
+	p.registerInfix(token.DOT, p.parseMemberExpression)
 	return p
+}
+
+func(p *Parser)parseMemberExpression(left ast.Expression)ast.Expression{
+	exp := &ast.MemberExpression{
+		Token: p.curToken,
+		Object: left,
+	}
+	
+	if !p.expectPeek(token.IDENT){
+		return nil
+	}
+	
+	exp.Property = &ast.Identifier{
+		Token: p.curToken,
+		Value: p.curToken.Literal,
+	}
+	
+	return exp
 }
 
 func (p *Parser) parseWhileExpression() ast.Expression {
