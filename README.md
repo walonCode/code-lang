@@ -27,6 +27,9 @@ Code-Lang is a modern, interpreted programming language written in Go. It began 
   - Comparison: `==`, `!=`, `<`, `>`, `<=`, `>=`
   - Logical: `!` (Negation)
 - **Built-in Functions:** `print`, `printf`, `typeof`, `len`, `push`, and more.
+- **Module System:** Import other `.cl` files using `import "module"`.
+- **Member Access:** Dot notation (`obj.prop`) for Hashes and Modules.
+- **Compound Assignment:** Supports `+=`, `-=`, `*=`, `/=`, etc.
 - **REPL:** Interactive shell with precise line/column error tracking.
 - **File Execution:** Run scripts with the `.cl` extension.
 
@@ -127,9 +130,30 @@ while (i < 5) {
 };
 
 // For loop
-for (let j = 0; j < 5; j = j + 1) {
+for (let j = 0; j < 5; j += 1) {
     print(j);
 };
+```
+
+### Modules & Member Access
+
+```rust
+// math_lib.cl
+let PI = 3.14159;
+let square = fn(x) { x * x; };
+
+// main.cl
+import "math_lib";
+print(math_lib.PI);
+print(math_lib.square(10));
+
+// Hashes
+let user = {"name": "Thorsten", "active": true};
+user.name = "Walon";
+user.score = 100;
+user.score += 50;
+print(user.name); // Walon
+print(user.score); // 150
 ```
 
 ### Advanced Features
@@ -161,8 +185,10 @@ We are constantly working to make Code-Lang better. Here is what's coming next:
 - [x] **Comments:** Support for single and multi-line comments.
 - [x] **Loops:** Implementing `while` and `for` loops.
 - [ ] **Logical Operators:** Adding `&&` (AND) and `||` (OR) with short-circuiting.
-- [ ] **Standard Library:** Dedicated modules for `math`, `fs`, and `http`.
-- [ ] **Import System:** Ability to include other `.cl` files.
+- [ ] **Standard Library (Internal):** Dedicated Go-backed modules for `math`, `fs`, and `http`.
+- [x] **Import System:** Ability to include other `.cl` files.
+- [x] **Member Access:** Dot notation for objects and modules.
+- [x] **Compound Assignment:** Support for `+=`, `-=`, etc.
 
 ---
 
