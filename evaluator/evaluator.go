@@ -1,12 +1,19 @@
 package evaluator
 
 import (
+	"maps"
 	"math"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/walonCode/code-lang/ast"
+	"github.com/walonCode/code-lang/lexer"
 	"github.com/walonCode/code-lang/object"
+	"github.com/walonCode/code-lang/parser"
 )
+
+var moduleCache = map[string]*object.Module{}
 
 func Eval(node ast.Node, env *object.Environment) object.Object {
 	switch node := node.(type) {
@@ -21,6 +28,8 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 			return val
 		}
 		return &object.ReturnValue{Value: val}
+	case *ast.ImportStatement:
+		return evalImportStatement(node, env)
 	case *ast.LetStatement:
 		val := Eval(node.Value, env)
 		if isError(val) {
@@ -111,6 +120,36 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 	}
 
 	return nil
+}
+
+func evalImportStatement(node *ast.ImportStatement, env *object.Environment)object.Object{
+	modulePath := node.Path
+	
+	if mod, ok := moduleCache[modulePath];ok {
+		return mod
+	}
+	
+	fileName := filepath.Clean(modulePath + ".cl")
+	content, err := os.ReadFile(fileName)
+	if err != nil {
+		return object.NewError(node.Line(), node.Column(), "could not read module %q : %s",modulePath, err)
+	}
+	
+	moduleEnv := object.NewEnclosedEnvironment(env)
+	
+	l := lexer.New(string(content))
+	p := parser.New(l)
+	programe := p.ParsePrograme()
+	
+	Eval(programe, moduleEnv)
+	
+	moduleobj := &object.Module{ Members: map[string]object.Object{}}
+	maps.Copy(moduleobj.Members, moduleEnv.Store)
+	env.Set(modulePath, moduleobj)
+	
+	moduleCache[modulePath] = moduleobj
+	
+	return moduleobj
 }
 
 func isAssignment(op string) bool {
@@ -240,6 +279,9 @@ func evalAssignMember(obj object.Object, node *ast.MemberExpression, val object.
 		}
 
 		return val
+	case *object.Module:
+		obj.Members[node.Property.Value] = val
+		return val	
 	default:
 		return object.NewError(node.Line(), node.Column(), "cannot assign to property %s on %s", node.Property.Value, obj.Type())
 	}
@@ -253,6 +295,13 @@ func evalMemberExpression(obj object.Object, node *ast.MemberExpression) object.
 			return val.Value
 		}
 		return object.NewError(node.Line(), node.Column(), "property not found: %s", node.Property.Value)
+	case *object.Module:
+		val, ok := obj.Members[node.Property.Value]
+		if !ok {
+			return object.NewError(node.Line(), node.Column(), "module has not member %s", node.Property.Value)
+		}
+		
+		return val
 	default:
 		return object.NewError(node.Line(), node.Column(), "cannot access property %s on %s", node.Property.Value, obj.Type())
 	}

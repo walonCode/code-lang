@@ -26,6 +26,7 @@ const (
 	BUILTIN_OBJ      = "BUILTIN"
 	ARRAY_OBJ        = "ARRAY"
 	HASH_OBJ         = "HASH"
+	MODULE_OBJ = "MODULE"
 )
 
 // this allows us only to have on Bolean object and Null object
