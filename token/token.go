@@ -70,6 +70,8 @@ const (
 	//class thing
 	DOT = "."
 	
+	IMPORT = "IMPORT"
+	
 	//comment
 	COMMENT = "#"
 	MULTI_COMMENT_START = "/*"
@@ -89,6 +91,7 @@ var keywords = map[string]TokenType{
 	"return":RETURN,
 	"break":BREAK,
 	"continue":CONTINUE,
+	"import":IMPORT,
 }
 
 
