@@ -1,7 +1,12 @@
 package general
 
 import (
+	"bufio"
 	"fmt"
+	"os"
+	"os/exec"
+	"runtime"
+	"strconv"
 	"strings"
 
 	"github.com/walonCode/code-lang/ast"
@@ -80,6 +85,102 @@ var fmtBuiltins = map[string]*object.Builtin{
 			}
 			return &object.String{Value: string(args[0].Type())}
 		},
+	},
+	"int": {
+		Fn: func(node *ast.CallExpression, args ...object.Object) object.Object {
+			if len(args) != 1{
+				return object.NewError(node.Line(), node.Column(), "wrong number of arguments. got=%d, want=1", len(args))
+			}
+			
+			val,ok := args[0].(*object.String)
+			if !ok {
+				return object.NewError(node.Line(), node.Column(), "input must be a string")
+			}
+			
+			int, err  := strconv.Atoi(val.Value)
+			if err != nil {
+				return object.NewError(node.Line(), node.Column(), "input is not a string")
+			}
+			
+			return &object.Integer{Value: int64(int)}
+		},
+	},
+	"float": {
+		Fn: func(node *ast.CallExpression, args ...object.Object) object.Object {
+			if len(args) != 1{
+				return object.NewError(node.Line(), node.Column(), "wrong number of arguments. got=%d, want=1", len(args))
+			}
+			
+			switch obj := args[0].(type){
+				case *object.Integer:
+					float := float64(obj.Value)
+					return &object.Float{Value: float}
+				case *object.String:
+					float, err  := strconv.ParseFloat(obj.Value, 64)
+					if err != nil {
+						return object.NewError(node.Line(), node.Column(), "input is not a string")
+					}
+					
+					return &object.Float{Value: float}
+				default:
+					return object.NewError(node.Line(), node.Column(), "input must be a string or an int")
+			}
+		},
+	},
+	"input":{
+		Fn: func(node *ast.CallExpression, args ...object.Object) object.Object {
+			if len(args) != 1{
+				return object.NewError(node.Line(), node.Column(), "wrong number of arguments. got=%d, want=1", len(args))
+			}
+			
+			val,ok := args[0].(*object.String)
+			if !ok {
+				return object.NewError(node.Line(), node.Column(), "input must be a string")
+			}
+			
+			fmt.Printf("%s: ",val.Value)
+			scanner := bufio.NewScanner(os.Stdin)
+			scanner.Scan()
+			text := scanner.Text()
+			
+			return &object.String{Value: text}
+		},
+	},
+	"exit": {
+		Fn: func(node *ast.CallExpression, args ...object.Object) object.Object {
+			if len(args) != 1{
+				return object.NewError(node.Line(), node.Column(), "wrong number of arguments. got=%d, want=1", len(args))
+			}
+			
+			val,ok := args[0].(*object.Integer)
+			if !ok {
+				return object.NewError(node.Line(), node.Column(), "input must be a int")
+			}
+			
+			os.Exit(int(val.Value))
+			
+			return nil
+		},
+	},
+	"clear":{
+		Fn: func(node *ast.CallExpression, args ...object.Object) object.Object {
+			if len(args) == 1 {
+				return object.NewError(node.Line(), node.Column(), "function doesn't take any input")
+			}
+			
+			var cmd *exec.Cmd
+			
+			if runtime.GOOS == "windows"{
+				cmd = exec.Command("cmd", "/c", "cls")
+			}else {
+				cmd = exec.Command("clear")
+			}
+			cmd.Stdout = os.Stdout
+			cmd.Run()
+			
+			return nil
+		},
+	
 	},
 }
 
