@@ -46,29 +46,8 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		}
 		return evalPrefixExpression(node, right)
 	case *ast.InfixExpression:
-		if node.Operator == "=" {
-			 if ident, ok := node.Left.(*ast.Identifier); ok {
-	            val := Eval(node.Right, env)
-	            if isError(val) {
-	                return val
-	            }
-	            env.Set(ident.Value, val)
-	            return val
-	        }
-			
-			if member, ok := node.Left.(*ast.MemberExpression); ok {
-				obj := Eval(member.Object, env)
-				if isError(obj){
-					return obj
-				}
-				
-				val := Eval(node.Right, env)
-				if isError(val){
-					return val
-				}
-				
-				return evalAssignMember(obj, member, val)
-			}
+		if isAssignment(node.Operator) {
+			return evalAssignment(node, env)
 		}
 
 		left := Eval(node.Left, env)
@@ -124,41 +103,158 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		return evalHashLiteral(node, env)
 	case *ast.MemberExpression:
 		obj := Eval(node.Object, env)
-		if isError(obj){
+		if isError(obj) {
 			return obj
 		}
-		
+
 		return evalMemberExpression(obj, node)
 	}
 
 	return nil
 }
 
-func evalAssignMember(obj object.Object, node *ast.MemberExpression, val object.Object)object.Object{
-	switch obj := obj.(type){
-		case *object.Hash:
-			key := &object.String{Value: node.Property.Value}
-			obj.Pairs[key.HashKey()] = object.HashPair{
-				Key: key,
-				Value:val,
-			}
-			
-			return val
-		default:
-			return object.NewError(node.Line(), node.Column(), "cannot assign to property %s on %s", node.Property.Value, obj.Type())
+func isAssignment(op string) bool {
+	switch op {
+	case "=", "+=", "-=", "*=", "/=", "%=", "**=", "//=":
+		return true
+	default:
+		return false
 	}
 }
 
-func evalMemberExpression(obj object.Object, node *ast.MemberExpression)object.Object{
-	switch obj := obj.(type){
-		case *object.Hash:
-			key := &object.String{Value: node.Property.Value}
-			if val, ok := obj.Pairs[object.HashKey(key.HashKey())];ok {
-				return val.Value
+func evalAssignment(node *ast.InfixExpression, env *object.Environment) object.Object {
+	val := Eval(node.Right, env)
+	if isError(val) {
+		return val
+	}
+
+	switch left := node.Left.(type) {
+	case *ast.Identifier:
+		var finalVal object.Object
+		if node.Operator == "=" {
+			finalVal = val
+		} else {
+			currentVal := evalIdentifier(left, env)
+			if isError(currentVal) {
+				return currentVal
 			}
-			return object.NewError(node.Line(), node.Column(), "property not found: %s", node.Property.Value)
-		default:
-			return object.NewError(node.Line(), node.Column(), "cannot access property %s on %s", node.Property.Value, obj.Type())
+			finalVal = evalInfixExpression(node, currentVal, val)
+		}
+
+		if isError(finalVal) {
+			return finalVal
+		}
+
+		_, updated := env.Update(left.Value, finalVal)
+		if !updated {
+			env.Set(left.Value, finalVal)
+		}
+		return finalVal
+
+	case *ast.MemberExpression:
+		obj := Eval(left.Object, env)
+		if isError(obj) {
+			return obj
+		}
+
+		var finalVal object.Object
+		if node.Operator == "=" {
+			finalVal = val
+		} else {
+			currentVal := evalMemberExpression(obj, left)
+			if isError(currentVal) {
+				return currentVal
+			}
+			finalVal = evalInfixExpression(node, currentVal, val)
+		}
+
+		if isError(finalVal) {
+			return finalVal
+		}
+
+		return evalAssignMember(obj, left, finalVal)
+
+	case *ast.IndexExpression:
+		obj := Eval(left.Left, env)
+		if isError(obj) {
+			return obj
+		}
+
+		idx := Eval(left.Index, env)
+		if isError(idx) {
+			return idx
+		}
+
+		var finalVal object.Object
+		if node.Operator == "=" {
+			finalVal = val
+		} else {
+			currentVal := evalIndexExpression(obj, idx, left)
+			if isError(currentVal) {
+				return currentVal
+			}
+			finalVal = evalInfixExpression(node, currentVal, val)
+		}
+
+		if isError(finalVal) {
+			return finalVal
+		}
+
+		return evalAssignIndex(obj, idx, finalVal, left)
+	}
+
+	return object.NewError(node.Line(), node.Column(), "invalid left-hand side in assignment")
+}
+
+func evalAssignIndex(obj, idx, val object.Object, node *ast.IndexExpression) object.Object {
+	switch obj := obj.(type) {
+	case *object.Array:
+		i, ok := idx.(*object.Integer)
+		if !ok {
+			return object.NewError(node.Line(), node.Column(), "index must be an integer, got %s", idx.Type())
+		}
+		if i.Value < 0 || i.Value >= int64(len(obj.Elements)) {
+			return object.NewError(node.Line(), node.Column(), "index out of range: %d", i.Value)
+		}
+		obj.Elements[i.Value] = val
+		return val
+	case *object.Hash:
+		hashKey, ok := idx.(object.Hashable)
+		if !ok {
+			return object.NewError(node.Line(), node.Column(), "unusable as hash key: %s", idx.Type())
+		}
+		obj.Pairs[hashKey.HashKey()] = object.HashPair{Key: idx, Value: val}
+		return val
+	default:
+		return object.NewError(node.Line(), node.Column(), "index assignment not supported for %s", obj.Type())
+	}
+}
+
+func evalAssignMember(obj object.Object, node *ast.MemberExpression, val object.Object) object.Object {
+	switch obj := obj.(type) {
+	case *object.Hash:
+		key := &object.String{Value: node.Property.Value}
+		obj.Pairs[key.HashKey()] = object.HashPair{
+			Key:   key,
+			Value: val,
+		}
+
+		return val
+	default:
+		return object.NewError(node.Line(), node.Column(), "cannot assign to property %s on %s", node.Property.Value, obj.Type())
+	}
+}
+
+func evalMemberExpression(obj object.Object, node *ast.MemberExpression) object.Object {
+	switch obj := obj.(type) {
+	case *object.Hash:
+		key := &object.String{Value: node.Property.Value}
+		if val, ok := obj.Pairs[object.HashKey(key.HashKey())]; ok {
+			return val.Value
+		}
+		return object.NewError(node.Line(), node.Column(), "property not found: %s", node.Property.Value)
+	default:
+		return object.NewError(node.Line(), node.Column(), "cannot access property %s on %s", node.Property.Value, obj.Type())
 	}
 }
 
