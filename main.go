@@ -9,19 +9,26 @@ import (
 	"github.com/walonCode/code-lang/repl"
 )
 
+var (
+	Version = "dev"
+	Commit = "none"
+)
+
 func main() {
-	args := os.Args[1:]
 	
-	if len(args) > 0 {
-		ruleFile(args[0])
-		return
-	}
-	
-	//default case if no file provided
-	runRepl()
+	if len(os.Args) > 1 {
+		switch os.Args[1]{
+			case "-v", "--version":
+				fmt.Printf("code-lang %s %s\n", Version, Commit)
+			default:
+				runFile(os.Args[1])
+		}
+	}else {
+		runRepl()
+	}	
 }
 
-func ruleFile(path string){
+func runFile(path string){
 	if filepath.Ext(path) != ".cl" {
 		fmt.Fprintf(os.Stderr, "Error: File %s must have a .cl extension\n", path)
 		os.Exit(1)

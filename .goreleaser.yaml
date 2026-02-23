@@ -33,6 +33,10 @@ builds:
         goarch: arm64
     flags:
       - -trimpath
+    ldflags:
+      - -s -w
+      - -X main.Version={{ .Version }}
+      - -X main.Commit={{ .Commit }}
 
 archives:
   - name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
