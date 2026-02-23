@@ -14,5 +14,5 @@ func init() {
     moduleCache["fmt"] = general.Module()
     moduleCache["http"] = net.HttpModule()
     moduleCache["json"] = json.JsonModule()
-    moduleCache["net"] = net.NetModule()
+    moduleCache["net"] = net.NetModule(applyFunction)
 }

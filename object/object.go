@@ -26,7 +26,8 @@ const (
 	BUILTIN_OBJ      = "BUILTIN"
 	ARRAY_OBJ        = "ARRAY"
 	HASH_OBJ         = "HASH"
-	MODULE_OBJ = "MODULE"
+	MODULE_OBJ       = "MODULE"
+	SERVER_OBJ       = "SERVER"
 )
 
 // this allows us only to have on Bolean object and Null object
@@ -217,3 +218,14 @@ func (h *Hash) Inspect() string {
 	return out.String()
 }
 
+// server obj
+type Server struct {
+	Members map[string]Object
+}
+
+func (h *Server) Type() ObjectType { return HASH_OBJ }
+func (h *Server) Inspect() string {
+	var out bytes.Buffer
+	out.WriteString("server")
+	return out.String()
+}
