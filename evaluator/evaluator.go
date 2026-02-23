@@ -283,6 +283,9 @@ func evalAssignMember(obj object.Object, node *ast.MemberExpression, val object.
 	case *object.Module:
 		obj.Members[node.Property.Value] = val
 		return val	
+	case *object.Server:
+		obj.Members[node.Property.Value] = val
+		return val	
 	default:
 		return object.NewError(node.Line(), node.Column(), "cannot assign to property %s on %s", node.Property.Value, obj.Type())
 	}
@@ -303,6 +306,13 @@ func evalMemberExpression(obj object.Object, node *ast.MemberExpression) object.
 		}
 		
 		return val
+	case *object.Server:
+		val, ok := obj.Members[node.Property.Value]
+		if !ok {
+			return object.NewError(node.Line(), node.Column(), "server has not member %s", node.Property.Value)
+		}
+		
+		return val	
 	default:
 		return object.NewError(node.Line(), node.Column(), "cannot access property %s on %s", node.Property.Value, obj.Type())
 	}

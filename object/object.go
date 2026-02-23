@@ -220,10 +220,12 @@ func (h *Hash) Inspect() string {
 
 // server obj
 type Server struct {
+	Route map[string]Object
+	ApplyFunc func(fn Object,args []Object, node *ast.CallExpression )Object
 	Members map[string]Object
 }
 
-func (h *Server) Type() ObjectType { return HASH_OBJ }
+func (h *Server) Type() ObjectType { return SERVER_OBJ }
 func (h *Server) Inspect() string {
 	var out bytes.Buffer
 	out.WriteString("server")
