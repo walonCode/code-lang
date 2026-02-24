@@ -60,11 +60,11 @@ func (l *Lexer) NextToken() token.Token {
 	case ')':
 		tok = newToken(token.RPAREN, l.ch, currentLine, currentColumn)
 	case '+':
-		if l.peakChar() == '='{
+		if l.peakChar() == '=' {
 			ch := l.ch
 			l.readChar()
-			tok = token.Token{Type:token.ADD_ASSIGN, Literal: string(ch) + string(l.ch), Line: currentLine, Column: currentColumn}
-		}else{
+			tok = token.Token{Type: token.ADD_ASSIGN, Literal: string(ch) + string(l.ch), Line: currentLine, Column: currentColumn}
+		} else {
 			tok = newToken(token.PLUS, l.ch, currentLine, currentColumn)
 		}
 	case '{':
@@ -76,7 +76,7 @@ func (l *Lexer) NextToken() token.Token {
 			ch := l.ch
 			l.readChar()
 			tok = token.Token{Type: token.SUB_ASSIGN, Literal: string(ch) + string(l.ch), Column: currentColumn, Line: currentLine}
-		}else{
+		} else {
 			tok = newToken(token.MINUS, l.ch, currentLine, currentColumn)
 		}
 	case '[':
@@ -99,12 +99,12 @@ func (l *Lexer) NextToken() token.Token {
 			ch := l.ch
 			l.readChar()
 			tok = token.Token{Type: token.FLOOR, Literal: string(ch) + string(l.ch), Line: currentLine, Column: currentColumn}
-		}else if l.peakChar() == '*' {
+		} else if l.peakChar() == '*' {
 			l.readChar()
 			l.readChar()
 			l.skipMultiLneComment()
 			return l.NextToken()
-		}else if l.peakChar() == '='{
+		} else if l.peakChar() == '=' {
 			ch := l.ch
 			l.readChar()
 			tok = token.Token{Type: token.QUO_ASSIGN, Literal: string(ch) + string(l.ch), Line: currentLine, Column: currentColumn}
@@ -116,7 +116,7 @@ func (l *Lexer) NextToken() token.Token {
 			ch := l.ch
 			l.readChar()
 			tok = token.Token{Type: token.SQUARE, Literal: string(ch) + string(l.ch), Line: currentLine, Column: currentColumn}
-		}else if l.peakChar() == '=' {
+		} else if l.peakChar() == '=' {
 			ch := l.ch
 			l.readChar()
 			tok = token.Token{Type: token.MUL_ASSIGN, Literal: string(ch) + string(l.ch), Column: currentColumn, Line: currentLine}
@@ -142,11 +142,11 @@ func (l *Lexer) NextToken() token.Token {
 	case ';':
 		tok = newToken(token.SEMICOLON, l.ch, currentLine, currentColumn)
 	case '%':
-		if l.peakChar() == '='{
+		if l.peakChar() == '=' {
 			ch := l.ch
 			l.readChar()
 			tok = token.Token{Type: token.REM_ASSIGN, Literal: string(ch) + string(l.ch), Line: currentLine, Column: currentColumn}
-		}else {
+		} else {
 			tok = newToken(token.REM, l.ch, currentLine, currentColumn)
 		}
 	case ',':
@@ -162,12 +162,12 @@ func (l *Lexer) NextToken() token.Token {
 		tok.Line = currentLine
 		tok.Column = currentColumn
 	case '.':
-		if isDigit(l.peakChar()){
+		if isDigit(l.peakChar()) {
 			tok.Type = token.FLOAT
 			tok.Literal = l.readFloat()
 			tok.Line = currentLine
 			tok.Column = currentColumn
-		}else {
+		} else {
 			tok = newToken(token.DOT, l.ch, currentLine, currentColumn)
 		}
 	case ':':
@@ -203,24 +203,24 @@ func (l *Lexer) NextToken() token.Token {
 	return tok
 }
 
-func(l *Lexer)skipSingleLineComment(){
+func (l *Lexer) skipSingleLineComment() {
 	for l.ch != '\n' && l.ch != 0 {
 		l.readChar()
 	}
 }
 
-func (l *Lexer)skipMultiLneComment(){
+func (l *Lexer) skipMultiLneComment() {
 	for {
 		if l.ch == 0 {
 			break
 		}
-		
-		if l.ch == '*' && l.peakChar() == '/'{
+
+		if l.ch == '*' && l.peakChar() == '/' {
 			l.readChar()
 			l.readChar()
 			break
 		}
-		
+
 		l.readChar()
 	}
 }
@@ -254,7 +254,7 @@ func (l *Lexer) readString() string {
 
 func (l *Lexer) readIndentifier() string {
 	position := l.position
-	for isLetter(l.ch) {
+	for isLetter(l.ch) || isDigit(l.ch) {
 		l.readChar()
 	}
 	return l.input[position:l.position]

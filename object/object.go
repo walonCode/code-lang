@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"hash/fnv"
 	"strings"
+	"time"
 
 	"github.com/walonCode/code-lang/ast"
 )
@@ -28,6 +29,7 @@ const (
 	HASH_OBJ         = "HASH"
 	MODULE_OBJ       = "MODULE"
 	SERVER_OBJ       = "SERVER"
+	TIME_OBJ         = "TIME"
 )
 
 // this allows us only to have on Bolean object and Null object
@@ -220,9 +222,9 @@ func (h *Hash) Inspect() string {
 
 // server obj
 type Server struct {
-	Route map[string]Object
-	ApplyFunc func(fn Object,args []Object, node *ast.CallExpression )Object
-	Members map[string]Object
+	Route     map[string]Object
+	ApplyFunc func(fn Object, args []Object, node *ast.CallExpression) Object
+	Members   map[string]Object
 }
 
 func (h *Server) Type() ObjectType { return SERVER_OBJ }
@@ -230,4 +232,14 @@ func (h *Server) Inspect() string {
 	var out bytes.Buffer
 	out.WriteString("server")
 	return out.String()
+}
+
+// time object
+type Time struct {
+	Value time.Time
+}
+
+func (t *Time) Type() ObjectType { return TIME_OBJ }
+func (t *Time) Inspect() string {
+	return t.Value.Format("2006-01-02 15:04:05")
 }
