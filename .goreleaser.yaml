@@ -34,9 +34,9 @@ builds:
     flags:
       - -trimpath
     ldflags:
-      - -s -w
-      - -X main.Version={{ .Version }}
-      - -X main.Commit={{ .Commit }}
+      - -s -w -X github.com/walonCode/code-lang/main.Version={{.Version}}
+      - -X main.Version={{.Version}}
+      - -X main.Commit={{.Commit}}
 
 archives:
   - name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
