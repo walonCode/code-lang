@@ -66,6 +66,7 @@ const (
 	WHILE = "WHILE"
 	CONTINUE = "CONTINUE"
 	BREAK = "BREAK"
+	CLASS = "CLASS"
 	
 	//class thing
 	DOT = "."
@@ -92,6 +93,7 @@ var keywords = map[string]TokenType{
 	"break":BREAK,
 	"continue":CONTINUE,
 	"import":IMPORT,
+	"class":CLASS,
 }
 
 
