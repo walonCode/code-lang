@@ -31,6 +31,7 @@ Code-Lang is a modern, interpreted programming language written in Go. It began 
 - **Member Access:** Dot notation (`obj.prop`) for Hashes, Modules, and Servers.
 - **Networking:** Built-in `http` client (GET, POST, etc.) and `net.server` for creating web servers.
 - **JSON Support:** Built-in `json.parse()` and `json.stringify()`.
+- **Standard Library:** Go-backed modules for `math`, `strings`, `time`, `hash`, `os`, `json`, and `net`.
 - **Compound Assignment:** Supports `+=`, `-=`, `*=`, `/=`, etc.
 - **REPL:** Interactive shell with precise line/column error tracking.
 - **File Execution:** Run scripts with the `.cl` extension.
@@ -140,43 +141,53 @@ for (let j = 0; j < 5; j += 1) {
 ### Modules & Member Access
 
 ```rust
-### Networking & JSON
+### Standard Library Examples
 
+#### Networking & JSON
 ```rust
-import "net";
 import "http";
 import "json";
-import "fmt";
 
-// HTTP GET
 let res = http.get("https://jsonplaceholder.typicode.com/todos/1");
-print(res.status);
-print(res.body);
-
-// JSON Parsing
 let data = json.parse(res.body);
-print(data["title"]);
-
-// HTTP POST with JSON
-let payload = {"title": "foo", "body": "bar", "userId": 1};
-let postRes = http.post("https://jsonplaceholder.typicode.com/posts", json.stringify(payload));
-print(postRes.status);
-
-// Web Server
-let server = net.server();
-server.on("GET", "/", fn(req, res) {
-    print("Request received!");
-});
-# server.listen(3000);
+print(data.title);
 ```
 
-// Hashes
-let user = {"name": "Thorsten", "active": true};
-user.name = "Walon";
-user.score = 100;
-user.score += 50;
-print(user.name); // Walon
-print(user.score); // 150
+#### Math & Time
+```rust
+import "math";
+import "time";
+
+let radius = 10;
+let area = math.PI * math.pow(radius, 2);
+print("Area:", math.round(area));
+
+let start = time.now();
+time.sleep(100);
+print("Elapsed (ms):", time.since(start));
+```
+
+#### Strings & Hashes
+```rust
+import "strings";
+import "hash";
+
+let s = "  hello world  ";
+print(strings.trim(strings.to_upper(s))); # HELLO WORLD
+
+let user = {"name": "walon", "age": 25};
+if (hash.has_key(user, "name")) {
+    print("User keys:", hash.keys(user));
+}
+```
+
+#### OS & Environment
+```rust
+import "os";
+
+print("Platform:", os.platform);
+print("API Key:", os.get_env("API_KEY"));
+os.exit(0);
 ```
 
 ### Advanced Features
@@ -208,11 +219,11 @@ We are constantly working to make Code-Lang better. Here is what's coming next:
 - [x] **Comments:** Support for single and multi-line comments.
 - [x] **Loops:** Implementing `while` and `for` loops.
 - [ ] **Logical Operators:** Adding `&&` (AND) and `||` (OR) with short-circuiting.
-- [x] **Standard Library (Internal):** Dedicated Go-backed modules for `fmt`, `net/http`, and `json`.
+- [x] **Standard Library (Internal):** Modules for `fmt`, `math`, `strings`, `time`, `hash`, `os`, `net/http`, and `json`.
 - [x] **Import System:** Ability to include other `.cl` files.
 - [x] **Member Access:** Dot notation for objects and modules.
 - [x] **Compound Assignment:** Support for `+=`, `-=`, etc.
-- [WIP] **Web Server:** Asynchronous request/response handling.
+- [WIP] **Web Server:** Request/Response handling and server state.
 
 ---
 
