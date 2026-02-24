@@ -2,6 +2,7 @@ package evaluator
 
 import (
 	"github.com/walonCode/code-lang/std/arrays"
+	"github.com/walonCode/code-lang/std/fs"
 	"github.com/walonCode/code-lang/std/general"
 	"github.com/walonCode/code-lang/std/json"
 	"github.com/walonCode/code-lang/std/net"
@@ -15,4 +16,5 @@ func init() {
     moduleCache["http"] = net.HttpModule()
     moduleCache["json"] = json.JsonModule()
     moduleCache["net"] = net.NetModule(applyFunction)
+    moduleCache["fs"] = fs.Module()
 }
