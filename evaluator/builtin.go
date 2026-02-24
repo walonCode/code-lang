@@ -4,9 +4,11 @@ import (
 	"github.com/walonCode/code-lang/std/arrays"
 	"github.com/walonCode/code-lang/std/fs"
 	"github.com/walonCode/code-lang/std/general"
+	"github.com/walonCode/code-lang/std/hash"
 	"github.com/walonCode/code-lang/std/json"
 	"github.com/walonCode/code-lang/std/math"
 	"github.com/walonCode/code-lang/std/net"
+	"github.com/walonCode/code-lang/std/os"
 	"github.com/walonCode/code-lang/std/strings"
 	"github.com/walonCode/code-lang/std/time"
 )
@@ -21,5 +23,7 @@ func init() {
 	moduleCache["fs"] = fs.Module()
 	moduleCache["math"] = math.Module()
 	moduleCache["strings"] = strings.Module()
-    moduleCache["time"] = time.Module()
+	moduleCache["time"] = time.Module()
+	moduleCache["hash"] = hash.Module()
+	moduleCache["os"] = os.Module()
 }
