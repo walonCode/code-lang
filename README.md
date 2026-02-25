@@ -15,6 +15,7 @@ Code-Lang is a modern, interpreted programming language written in Go. It began 
   - Booleans
   - Arrays (e.g., `[1, 2, 3]`)
   - Hashes/Dictionaries (e.g., `{"name": "Code-Lang"}`)
+  - **Structs:** Custom data structures with default values and member access.
 - **First-Class Functions:** Function literals, closures, and higher-order functions.
 - **Control Flow:**
   - `if-elseif-else` expressions (everything is an expression!).
@@ -107,6 +108,19 @@ let fibonacci = [0, 1, 1, 2, 3, 5, 8];
 
 let person = {"name": "Alice", "age": 30};
 
+### Structs
+
+```rust
+struct User {
+    name: "Guest",
+    role: "User",
+}
+
+let u = User { name: "Walon", role: "Admin" };
+let guest = User {}; # Uses default values
+
+print(u.name); # Walon
+print(guest.name); # Guest
 ```
 
 ### Conditionals
@@ -221,8 +235,9 @@ We are constantly working to make Code-Lang better. Here is what's coming next:
 - [ ] **Logical Operators:** Adding `&&` (AND) and `||` (OR) with short-circuiting.
 - [x] **Standard Library (Internal):** Modules for `fmt`, `math`, `strings`, `time`, `hash`, `os`, `net/http`, and `json`.
 - [x] **Import System:** Ability to include other `.cl` files.
-- [x] **Member Access:** Dot notation for objects and modules.
+- [x] **Member Access:** Dot notation for objects, modules, and structs.
 - [x] **Compound Assignment:** Support for `+=`, `-=`, etc.
+- [x] **Structs:** Support for defining custom types and creating instances.
 - [WIP] **Web Server:** Request/Response handling and server state.
 
 ---
