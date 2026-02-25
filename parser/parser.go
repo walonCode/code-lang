@@ -105,9 +105,25 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseImportStatement()
 	case token.STRUCT:
 		return p.parseStructStatement()
+	case token.BREAK:
+		return p.parseBreakStatement()
+	case token.CONTINUE:
+		return p.parseContinueStatement() 
 	default:
 		return p.parseExpressionStatement()
 	}
+}
+
+func (p *Parser)parseBreakStatement()* ast.BreakStatement{
+	stmt := &ast.BreakStatement{ Token: p.curToken}
+	p.expectPeek(token.SEMICOLON)
+	return stmt
+}
+
+func(p *Parser)parseContinueStatement()*ast.ContinueStatement {
+	stmt := &ast.ContinueStatement{Token: p.curToken}
+	p.expectPeek(token.SEMICOLON)
+	return stmt
 }
 
 func(p *Parser)parseStructStatement()*ast.StructStatement{

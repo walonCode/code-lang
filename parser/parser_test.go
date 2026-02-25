@@ -1291,3 +1291,53 @@ func TestStructLiteral(t *testing.T) {
 		t.Errorf("structLit.Name.String() not 'User'. got=%s", structLit.Name.String())
 	}
 }
+
+
+func TestBreakStatement(t *testing.T){
+	input := `break;`
+
+	l := lexer.New(input)
+	p := New(l)
+	programe := p.ParsePrograme()
+	checkParserErrors(t, p)
+
+	if len(programe.Statements) != 1 {
+		t.Fatalf("program.Statements does not contain 1 statements. got=%d", len(programe.Statements))
+	}
+
+	stmt := programe.Statements[0]
+
+	breakStmt, ok := stmt.(*ast.BreakStatement)
+	if !ok {
+		t.Fatalf("stmt is not *ast.BreakStatement. got=%T", programe.Statements[0])
+	}
+
+	if breakStmt.TokenLiteral() != "break" {
+		t.Errorf("breakStmt.TokenLiteral() not 'break'. got=%s", breakStmt.TokenLiteral())
+	}
+}
+
+func TestContinueStatement(t *testing.T){
+	input := `continue;`
+
+	l := lexer.New(input)
+	p := New(l)
+	programe := p.ParsePrograme()
+	checkParserErrors(t, p)
+
+	if len(programe.Statements) != 1 {
+		t.Fatalf("program.Statements does not contain 1 statements. got=%d", len(programe.Statements))
+	}
+
+	stmt := programe.Statements[0]
+
+	continueStmt, ok := stmt.(*ast.ContinueStatement)
+	if !ok {
+		t.Fatalf("stmt is not *ast.ContinueStatement. got=%T", programe.Statements[0])
+	}
+
+	if continueStmt.TokenLiteral() != "continue" {
+		t.Errorf("continueStmt.TokenLiteral() not 'continue'. got=%s", continueStmt.TokenLiteral())
+	}
+}
+	

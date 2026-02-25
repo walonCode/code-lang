@@ -302,3 +302,21 @@ func (m *MemberExpression) Line() int   { return m.Token.Line }
 func (m *MemberExpression) Column() int { return m.Token.Column }
 
 
+type BreakStatement struct {
+	Token token.Token
+}
+func (bs *BreakStatement) statementNode() {}
+func (bs *BreakStatement) TokenLiteral() string { return bs.Token.Literal }
+func (bs *BreakStatement) String() string { return "break;" }
+func (bs *BreakStatement) Line() int   { return bs.Token.Line }
+func (bs *BreakStatement) Column() int { return bs.Token.Column }
+
+type ContinueStatement struct {
+    Token token.Token
+}
+
+func (cs *ContinueStatement) statementNode() {}
+func (cs *ContinueStatement) TokenLiteral() string { return cs.Token.Literal }
+func (cs *ContinueStatement) String() string { return "continue;" }
+func (cs *ContinueStatement) Line() int   { return cs.Token.Line }
+func (cs *ContinueStatement) Column() int { return cs.Token.Column }
