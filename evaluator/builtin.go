@@ -15,11 +15,12 @@ import (
 
 func init() {
 	// preload standard library modules
+	e := Evaluator{}
 	moduleCache["arrays"] = arrays.Module()
 	moduleCache["fmt"] = general.Module()
 	moduleCache["http"] = net.HttpModule()
 	moduleCache["json"] = json.JsonModule()
-	moduleCache["net"] = net.NetModule(applyFunction)
+	moduleCache["net"] = net.NetModule(e.applyFunction)
 	moduleCache["fs"] = fs.Module()
 	moduleCache["math"] = math.Module()
 	moduleCache["strings"] = strings.Module()

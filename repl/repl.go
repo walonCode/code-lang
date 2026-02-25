@@ -54,6 +54,8 @@ func Start(out io.Writer) {
 			printParserError(out, p.Errors())
 			continue
 		}
+		
+		evaluator := &evaluator.Evaluator{}
 
 		evaluated := evaluator.Eval(programe, env)
 		if evaluated != nil {
@@ -92,7 +94,8 @@ func Execute(source string, out io.Writer) {
 		printParserError(out, p.Errors())
 		return
 	}
-
+	
+	evaluator := evaluator.Evaluator{}
 	evaluated := evaluator.Eval(program, object.NewEnvironment())
 	if evaluated != nil && evaluated.Type() == object.ERROR_OBJ {
 		io.WriteString(out, evaluated.Inspect())

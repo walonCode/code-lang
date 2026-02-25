@@ -148,6 +148,8 @@ while (i < 5) {
 
 // For loop
 for (let j = 0; j < 5; j += 1) {
+    if (j == 2) { continue; };
+    if (j == 4) { break; };
     print(j);
 };
 ```
@@ -231,7 +233,7 @@ We are constantly working to make Code-Lang better. Here is what's coming next:
 
 - [x] **Better Error Reporting:** Line and column tracking for precise debugging.
 - [x] **Comments:** Support for single and multi-line comments.
-- [x] **Loops:** Implementing `while` and `for` loops.
+- [x] **Loops:** Implementing `while` and `for` loops with `break` and `continue` support.
 - [ ] **Logical Operators:** Adding `&&` (AND) and `||` (OR) with short-circuiting.
 - [x] **Standard Library (Internal):** Modules for `fmt`, `math`, `strings`, `time`, `hash`, `os`, `net/http`, and `json`.
 - [x] **Import System:** Ability to include other `.cl` files.
