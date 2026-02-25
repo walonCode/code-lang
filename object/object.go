@@ -30,6 +30,8 @@ const (
 	MODULE_OBJ       = "MODULE"
 	SERVER_OBJ       = "SERVER"
 	TIME_OBJ         = "TIME"
+	STRUCT_TYPE      = "STRUCT"
+	STRUCT_INSTANCE  = "STRUCT"
 )
 
 // this allows us only to have on Bolean object and Null object
@@ -243,3 +245,19 @@ func (t *Time) Type() ObjectType { return TIME_OBJ }
 func (t *Time) Inspect() string {
 	return t.Value.Format("2006-01-02 15:04:05")
 }
+
+type StructType struct {
+	Name     string
+	Defaults map[string]Object
+}
+
+func (s *StructType) Type() ObjectType { return "STRUCT_TYPE" }
+func (s *StructType) Inspect() string  { return "struct " + s.Name }
+
+type StructInstance struct {
+	TypeName string
+	Fields   map[string]Object
+}
+
+func (s *StructInstance) Type() ObjectType { return "STRUCT_INSTANCE" }
+func (s *StructInstance) Inspect() string  { return s.TypeName }

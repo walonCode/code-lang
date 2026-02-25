@@ -37,7 +37,7 @@ func (ss *StructStatement)Column()int { return ss.Token.Column}
 
 type StructLiteral struct {
 	Token token.Token
-	Type *Identifier
+	Name *Identifier
 	Fields map[string]Expression
 }
 func (sl *StructLiteral) expressionNode() {}
@@ -46,7 +46,7 @@ func (sl *StructLiteral) TokenLiteral() string {
 }
 func (sl *StructLiteral) String() string {
     var out strings.Builder
-    out.WriteString(sl.Type.String())
+    out.WriteString(sl.Name.String())
     out.WriteString(" { ")
     for k, v := range sl.Fields {
         out.WriteString(k)

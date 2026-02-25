@@ -45,7 +45,7 @@ var precendeces = map[token.TokenType]int{
 	token.SQUARE:             PRODUCT,
 	token.LPAREN:             CALL,
 	token.LBRACKET:           INDEX,
-	token.DOT: MEMBER,
+	token.DOT:                MEMBER,
 }
 
 func (p *Parser) peekPredences() int {
@@ -102,25 +102,74 @@ func (p *Parser) parseStatement() ast.Statement {
 	case token.RETURN:
 		return p.parseReturnStatement()
 	case token.IMPORT:
-		return p.parseImportStatement()	
+		return p.parseImportStatement()
+	case token.STRUCT:
+		return p.parseStructStatement()
 	default:
 		return p.parseExpressionStatement()
 	}
 }
 
-func (p *Parser) parseImportStatement() *ast.ImportStatement {
-	exp := &ast.ImportStatement{Token: p.curToken}
+func(p *Parser)parseStructStatement()*ast.StructStatement{
+	stmt := &ast.StructStatement{ Token:p.curToken}
 	
-	if !p.expectPeek(token.STRING){
+	if !p.expectPeek(token.IDENT){
 		return nil
 	}
 	
-	exp.Path = p.curToken.Literal
+	stmt.Name = &ast.Identifier{
+		Token: p.curToken,
+		Value: p.curToken.Literal,
+	}
+	
+	if !p.expectPeek(token.LBRACE){
+		return nil
+	}
+	
+	stmt.Fields = make(map[string]ast.Expression)
+	
+	for !p.peekTokenIs(token.RBRACE){
+		p.nextToken()
+		key := p.curToken.Literal
+		
+		if !p.expectPeek(token.COLON){
+			return nil
+		}
+		
+		p.nextToken()
+		value := p.parseExpression(LOWEST)
+		
+		stmt.Fields[key] = value
+		
+		if p.peekTokenIs(token.COMMA){
+			p.nextToken()
+		}
+	}
+	
+	if !p.expectPeek(token.RBRACE){
+		return nil
+	}
 	
 	if !p.expectPeek(token.SEMICOLON){
 		return nil
 	}
 	
+	return stmt
+}
+
+func (p *Parser) parseImportStatement() *ast.ImportStatement {
+	exp := &ast.ImportStatement{Token: p.curToken}
+
+	if !p.expectPeek(token.STRING) {
+		return nil
+	}
+
+	exp.Path = p.curToken.Literal
+
+	if !p.expectPeek(token.SEMICOLON) {
+		return nil
+	}
+
 	return exp
 }
 
@@ -180,6 +229,10 @@ func (p *Parser) parseExpression(predence int) ast.Expression {
 	}
 
 	leftExp := prefix()
+	
+	if p.peekTokenIs(token.LBRACE){
+		return p.parseStructLiteral(leftExp)
+	}
 
 	for !p.peekTokenIs(token.SEMICOLON) && predence < p.peekPredences() {
 		infix := p.infixParseFns[p.peekToken.Type]
@@ -193,6 +246,39 @@ func (p *Parser) parseExpression(predence int) ast.Expression {
 	}
 
 	return leftExp
+}
+
+func(p *Parser)parseStructLiteral(name ast.Expression)ast.Expression{
+	ident, ok := name.(*ast.Identifier)
+	if !ok {
+		return nil
+	}
+	
+	lit := &ast.StructLiteral{
+		Token:p.peekToken,
+		Name: ident,
+		Fields: make(map[string]ast.Expression),
+	}
+	
+	p.expectPeek(token.LBRACE)
+	
+	for !p.peekTokenIs(token.RBRACE){
+		p.nextToken()
+		key := p.curToken.Literal
+		
+		p.expectPeek(token.COLON)
+		p.nextToken()
+		
+		value := p.parseExpression(LOWEST)
+		lit.Fields[key] = value
+		
+		if p.peekTokenIs(token.COMMA){
+			p.nextToken()
+		}
+	}
+	
+	p.expectPeek(token.RBRACE)
+	return lit
 }
 
 func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
@@ -331,22 +417,21 @@ func New(l *lexer.Lexer) *Parser {
 	return p
 }
 
-
-func(p *Parser)parseMemberExpression(left ast.Expression)ast.Expression{
+func (p *Parser) parseMemberExpression(left ast.Expression) ast.Expression {
 	exp := &ast.MemberExpression{
-		Token: p.curToken,
+		Token:  p.curToken,
 		Object: left,
 	}
-	
-	if !p.expectPeek(token.IDENT){
+
+	if !p.expectPeek(token.IDENT) {
 		return nil
 	}
-	
+
 	exp.Property = &ast.Identifier{
 		Token: p.curToken,
 		Value: p.curToken.Literal,
 	}
-	
+
 	return exp
 }
 

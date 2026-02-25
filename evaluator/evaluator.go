@@ -36,6 +36,22 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 			return val
 		}
 		env.Set(node.Name.Value, val)
+	case *ast.StructStatement:
+		defaults := make(map[string]object.Object)
+		for field, exp := range node.Fields {
+			val := Eval(exp, env)
+			if isError(val){
+				return val
+			}
+			defaults[field] = val
+		}
+		
+		structType := &object.StructType{
+			Name: node.Name.Value,
+			Defaults: defaults,
+		}
+		env.Set(node.Name.Value, structType)
+		return object.NULL
 
 	//expression
 	case *ast.IntegerLiteral:
@@ -48,6 +64,40 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		return &object.Char{Value: node.Value}
 	case *ast.Boolean:
 		return nativeBoolToBooleanObject(node.Value)
+	case *ast.StructLiteral:
+		obj, ok := env.Get(node.Name.Value)
+		if !ok {
+			return object.NewError(
+				node.Line(),
+				node.Column(),
+				"unknown struct: %s",
+				node.Name.Value,
+			)
+		}
+		st, ok := obj.(*object.StructType)
+		if !ok {
+			return object.NewError(
+				node.Line(),
+				node.Column(),
+				"%s is not a struct",
+				node.Name.Value,
+			)
+		}
+		fields := make(map[string]object.Object)
+		maps.Copy(st.Defaults, fields)
+		
+		for k, exp := range node.Fields {
+			val := Eval(exp, env)
+			if isError(val){
+				return val
+			}
+			fields[k] = val
+		}
+		
+		return &object.StructInstance{
+			TypeName: st.Name,
+			Fields: fields,
+		}
 	case *ast.PrefixExpression:
 		right := Eval(node.Right, env)
 		if isError(right) {
@@ -312,7 +362,13 @@ func evalMemberExpression(obj object.Object, node *ast.MemberExpression) object.
 			return object.NewError(node.Line(), node.Column(), "server has not member %s", node.Property.Value)
 		}
 		
-		return val	
+		return val
+	case *object.StructInstance:
+		val, ok := obj.Fields[node.Property.Value]
+		if !ok {
+			return object.NewError(node.Line(), node.Column(), "unknown field %s on  %s", node.Property.Value, obj.TypeName)
+		}
+		return val
 	default:
 		return object.NewError(node.Line(), node.Column(), "cannot access property %s on %s", node.Property.Value, obj.Type())
 	}

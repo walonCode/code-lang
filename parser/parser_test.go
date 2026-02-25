@@ -1171,58 +1171,123 @@ func TestWhileExpression(t *testing.T) {
 	}
 }
 
-
-func TestMemberExpression(t *testing.T){
+func TestMemberExpression(t *testing.T) {
 	input := `foo.bar;`
-	
+
 	l := lexer.New(input)
 	p := New(l)
 	programe := p.ParsePrograme()
 	checkParserErrors(t, p)
-	
+
 	if len(programe.Statements) != 1 {
 		t.Errorf("")
 	}
-	
+
 	stmt, ok := programe.Statements[0].(*ast.ExpressionStatement)
 	if !ok {
 		t.Errorf("")
 	}
-	
+
 	member, ok := stmt.Expression.(*ast.MemberExpression)
 	if !ok {
 		t.Errorf("")
 	}
-	
+
 	if member.Object.String() != "foo" {
 		t.Errorf("")
 	}
-	
+
 	if member.Property.Value != "bar" {
 		t.Errorf("")
 	}
 }
 
-func TestImportStatement(t *testing.T){
+func TestImportStatement(t *testing.T) {
 	input := `import "walon"; `
-	
+
 	l := lexer.New(input)
 	p := New(l)
 	programe := p.ParsePrograme()
-	checkParserErrors(t,p)
-	
-	if len(programe.Statements) != 1{
+	checkParserErrors(t, p)
+
+	if len(programe.Statements) != 1 {
 		t.Errorf("")
 	}
-	
+
 	stmt := programe.Statements[0]
-	
+
 	imp, ok := stmt.(*ast.ImportStatement)
 	if !ok {
 		t.Errorf("")
 	}
-	
-	if imp.Path != "walon"{
+
+	if imp.Path != "walon" {
 		t.Errorf("")
+	}
+}
+
+func TestStructStatement(t *testing.T) {
+	input := `struct Person {
+		Name: "",
+		Age: 0,
+	};`
+
+	l := lexer.New(input)
+	p := New(l)
+	programe := p.ParsePrograme()
+	checkParserErrors(t, p)
+
+	if len(programe.Statements) != 1 {
+		t.Fatalf("program.Statements does not contain 1 statements. got=%d", len(programe.Statements))
+	}
+
+	stmt := programe.Statements[0]
+
+	strct, ok := stmt.(*ast.StructStatement)
+	if !ok {
+		t.Fatalf("stmt is not *ast.StructStatement. got=%T", stmt)
+	}
+
+	if strct.Name.Value != "Person" {
+		t.Errorf("strct.Name.Value not 'Person'. got=%s", strct.Name.Value)
+	}
+
+	if strct.Fields["Name"].String() != "" {
+		t.Errorf("strct.Fields['Name'] not '\"\"'. got=%s", strct.Fields["Name"].String())
+	}
+
+	if strct.Fields["Age"].String() != "0" {
+		t.Errorf("strct.Fields['Age'] not '0'. got=%s", strct.Fields["Age"].String())
+	}
+}
+
+func TestStructLiteral(t *testing.T) {
+	input := `User { name: "Alice"};`
+
+	l := lexer.New(input)
+	p := New(l)
+	programe := p.ParsePrograme()
+	checkParserErrors(t, p)
+
+	if len(programe.Statements) != 1 {
+		t.Fatalf("program.Statements does not contain 1 statements. got=%d", len(programe.Statements))
+	}
+
+	stmt, ok := programe.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("stmt is not *ast.ExpressionStatement. got=%T", programe.Statements[0])
+	}
+
+	structLit, ok := stmt.Expression.(*ast.StructLiteral)
+	if !ok {
+		t.Fatalf("stmt.Expression is not *ast.StructLiteral. got=%T", stmt.Expression)
+	}
+
+	if structLit.Fields["name"].String() != "Alice"{
+		t.Errorf("structLit.Fields['name'] not 'Alice'. got=%s", structLit.Fields["name"].String())
+	}
+
+	if structLit.Name.String() != "User" {
+		t.Errorf("structLit.Name.String() not 'User'. got=%s", structLit.Name.String())
 	}
 }

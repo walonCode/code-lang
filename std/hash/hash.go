@@ -1,6 +1,8 @@
 package hash
 
 import (
+	"maps"
+
 	"github.com/walonCode/code-lang/ast"
 	"github.com/walonCode/code-lang/object"
 )
@@ -92,12 +94,8 @@ func mergeFunc() object.Object {
 			}
 
 			newPairs := make(map[object.HashKey]object.HashPair)
-			for k, v := range h1.Pairs {
-				newPairs[k] = v
-			}
-			for k, v := range h2.Pairs {
-				newPairs[k] = v
-			}
+			maps.Copy(newPairs, h1.Pairs)
+			maps.Copy(newPairs, h2.Pairs)
 
 			return &object.Hash{Pairs: newPairs}
 		},
