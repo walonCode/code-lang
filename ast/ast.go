@@ -199,47 +199,6 @@ func (b *Boolean) String() string       { return b.Token.Literal }
 func (b *Boolean) Line() int            { return b.Token.Line }
 func (b *Boolean) Column() int          { return b.Token.Column }
 
-// if expression
-type ELSE_IF struct {
-	Condition   Expression
-	Consequence *BlockStatement
-}
-
-type IfExpression struct {
-	Token       token.Token
-	Condition   Expression
-	Consequence *BlockStatement
-	IfElse      []*ELSE_IF
-	Alternative *BlockStatement
-}
-
-// methods on the if expression
-func (i *IfExpression) expressionNode()      {}
-func (i *IfExpression) TokenLiteral() string { return i.Token.Literal }
-func (i *IfExpression) String() string {
-	var out bytes.Buffer
-
-	out.WriteString("if")
-	out.WriteString(i.Condition.String())
-	out.WriteString(" ")
-	out.WriteString(i.Consequence.String())
-
-	for _, v := range i.IfElse {
-		out.WriteString("elseif")
-		out.WriteString(v.Condition.String())
-		out.WriteString("")
-		out.WriteString(v.Consequence.String())
-	}
-
-	if i.Alternative != nil {
-		out.WriteString("else")
-		out.WriteString(i.Alternative.String())
-	}
-
-	return out.String()
-}
-func (i *IfExpression) Line() int   { return i.Token.Line }
-func (i *IfExpression) Column() int { return i.Token.Column }
 
 type BlockStatement struct {
 	Token      token.Token
@@ -259,32 +218,6 @@ func (bs *BlockStatement) String() string {
 }
 func (bs *BlockStatement) Line() int   { return bs.Token.Line }
 func (bs *BlockStatement) Column() int { return bs.Token.Column }
-
-// function
-type FunctionLiteral struct {
-	Token      token.Token
-	Parameters []*Identifier
-	Body       BlockStatement
-}
-
-// method on the function literal
-func (fl *FunctionLiteral) expressionNode()      {}
-func (fl *FunctionLiteral) TokenLiteral() string { return fl.Token.Literal }
-func (fl *FunctionLiteral) String() string {
-	var out bytes.Buffer
-	params := []string{}
-	for _, p := range fl.Parameters {
-		params = append(params, p.String())
-	}
-	out.WriteString(fl.TokenLiteral())
-	out.WriteString("(")
-	out.WriteString(strings.Join(params, ", "))
-	out.WriteString(") ")
-	out.WriteString(fl.Body.String())
-	return out.String()
-}
-func (fl *FunctionLiteral) Line() int   { return fl.Token.Line }
-func (fl *FunctionLiteral) Column() int { return fl.Token.Column }
 
 // call expression
 type CallExpression struct {
@@ -348,128 +281,6 @@ func (sl *FloatLiteral) String() string       { return sl.Token.Literal }
 func (sl *FloatLiteral) Line() int            { return sl.Token.Line }
 func (sl *FloatLiteral) Column() int          { return sl.Token.Column }
 
-// array
-type ArrayLiteral struct {
-	Token    token.Token
-	Elements []Expression
-}
-
-// method on Array literal
-func (al *ArrayLiteral) expressionNode()      {}
-func (al *ArrayLiteral) TokenLiteral() string { return al.Token.Literal }
-func (al *ArrayLiteral) String() string {
-	var out bytes.Buffer
-	elements := []string{}
-	for _, el := range al.Elements {
-		elements = append(elements, el.String())
-	}
-	out.WriteString("[")
-	out.WriteString(strings.Join(elements, ", "))
-	out.WriteString("]")
-	return out.String()
-}
-func (al *ArrayLiteral) Line() int   { return al.Token.Line }
-func (al *ArrayLiteral) Column() int { return al.Token.Column }
-
-// array index expression
-type IndexExpression struct {
-	Token token.Token //[
-	Left  Expression
-	Index Expression
-}
-
-// method on array index
-func (ie *IndexExpression) expressionNode()      {}
-func (ie *IndexExpression) TokenLiteral() string { return ie.Token.Literal }
-func (ie *IndexExpression) String() string {
-	var out bytes.Buffer
-	out.WriteString("(")
-	out.WriteString(ie.Left.String())
-	out.WriteString("[")
-	out.WriteString(ie.Index.String())
-	out.WriteString("])")
-	return out.String()
-}
-func (ie *IndexExpression) Line() int   { return ie.Token.Line }
-func (ie *IndexExpression) Column() int { return ie.Token.Column }
-
-// hash literal
-type HashLiteral struct {
-	Token token.Token
-	Pairs map[Expression]Expression
-}
-
-func (hl *HashLiteral) expressionNode()      {}
-func (hl *HashLiteral) TokenLiteral() string { return hl.Token.Literal }
-func (hl *HashLiteral) String() string {
-	var out bytes.Buffer
-	pairs := []string{}
-	for key, value := range hl.Pairs {
-		pairs = append(pairs, key.String()+":"+value.String())
-	}
-	out.WriteString("{")
-	out.WriteString(strings.Join(pairs, ", "))
-	out.WriteString("}")
-	return out.String()
-}
-func (hl *HashLiteral) Line() int   { return hl.Token.Line }
-func (hl *HashLiteral) Column() int { return hl.Token.Column }
-
-type ForExpression struct {
-	Token     token.Token // The 'for' token
-	Init      Statement   // e.g., let i = 0;
-	Condition Expression  // e.g., i < 10;
-	Post      Statement   // e.g., i = i + 1; (usually as an expression statement)
-	Body      *BlockStatement
-}
-
-func (f *ForExpression) expressionNode()      {}
-func (f *ForExpression) TokenLiteral() string { return f.Token.Literal }
-func (f *ForExpression) String() string {
-	var out bytes.Buffer
-
-	out.WriteString("for")
-	out.WriteString("(")
-	if f.Init != nil {
-		out.WriteString(f.Init.String())
-	}
-	out.WriteString("; ")
-	if f.Condition != nil {
-		out.WriteString(f.Condition.String())
-	}
-	out.WriteString("; ")
-	if f.Post != nil {
-		out.WriteString(f.Post.String())
-	}
-	out.WriteString(") ")
-	out.WriteString(f.Body.String())
-
-	return out.String()
-}
-func (f *ForExpression) Line() int   { return f.Token.Line }
-func (f *ForExpression) Column() int { return f.Token.Column }
-
-
-type WhileExpression struct {
-	Token token.Token
-	Condition Expression
-	Body *BlockStatement
-}
-func (w *WhileExpression) expressionNode()      {}
-func (w *WhileExpression) TokenLiteral() string { return w.Token.Literal }
-func (w *WhileExpression) String() string {
-	var out bytes.Buffer
-	
-	out.WriteString("while")
-	out.WriteString(" ")
-	out.WriteString(w.Condition.String())
-	out.WriteString(" ")
-	out.WriteString(w.Body.String())
-	
-	return out.String()
-}
-func (w *WhileExpression) Line() int   { return w.Token.Line }
-func (w *WhileExpression) Column() int { return w.Token.Column }
 
 type MemberExpression struct {
 	Token token.Token
@@ -490,20 +301,4 @@ func (m *MemberExpression) String() string {
 func (m *MemberExpression) Line() int   { return m.Token.Line }
 func (m *MemberExpression) Column() int { return m.Token.Column }
 
-type ImportStatement struct {
-	Token token.Token
-	Path string
-}
-func (i *ImportStatement) statementNode()      {}
-func (i *ImportStatement) TokenLiteral() string { return i.Token.Literal }
-func (i *ImportStatement) String() string {
-	var out bytes.Buffer
-	
-	out.WriteString("import")
-	out.WriteString(" ")
-	out.WriteString(i.Path)
-	
-	return out.String()
-}
-func (i *ImportStatement) Line() int   { return i.Token.Line }
-func (i *ImportStatement) Column() int { return i.Token.Column }
+
