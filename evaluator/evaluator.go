@@ -44,6 +44,12 @@ func (e *Evaluator) Eval(node ast.Node, env *object.Environment) object.Object {
 			return val
 		}
 		env.Set(node.Name.Value, val)
+	case *ast.ConstStatement:
+		val := e.Eval(node.Value, env)
+		if isError(val) {
+			return val
+		}
+		env.SetConst(node.Name.Value, val)
 	case *ast.StructStatement:
 		defaults := make(map[string]object.Object)
 		for field, exp := range node.Fields {
@@ -262,6 +268,10 @@ func (e *Evaluator) evalAssignment(node *ast.InfixExpression, env *object.Enviro
 
 		if isError(finalVal) {
 			return finalVal
+		}
+
+		if isConst, ok := env.Consts[left.Value]; ok && isConst {
+			return object.NewError(node.Line(), node.Column(), "cannot reassign to const: %s", left.Value)
 		}
 
 		_, updated := env.Update(left.Value, finalVal)
@@ -745,6 +755,9 @@ func evalInfixExpression(node *ast.InfixExpression, left, right object.Object) o
 	case isStringOrChar(left) && isStringOrChar(right):
 		return evalMixedStringOrCharInfixExpression(node, left, right)
 	default:
+		if left.Type() != right.Type() {
+			return object.NewError(node.Line(), node.Column(), "type mismatch: %s %s %s", left.Type(), node.Operator, right.Type())
+		}
 		return object.NewError(node.Line(), node.Column(), "unknown operator: %s %s %s", left.Type(), node.Operator, right.Type())
 	}
 }

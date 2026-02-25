@@ -1,6 +1,12 @@
 package object
 
 // Environment
+type Environment struct {
+	Store  map[string]Object
+	Consts map[string]bool
+	outer  *Environment
+}
+
 func NewEnclosedEnvironment(outer *Environment) *Environment {
 	env := NewEnvironment()
 	env.outer = outer
@@ -10,12 +16,8 @@ func NewEnclosedEnvironment(outer *Environment) *Environment {
 
 func NewEnvironment() *Environment {
 	s := make(map[string]Object)
-	return &Environment{Store: s}
-}
-
-type Environment struct {
-	Store map[string]Object
-	outer *Environment
+	c := make(map[string]bool)
+	return &Environment{Store: s, Consts: c}
 }
 
 func (e *Environment) Get(name string) (Object, bool) {
@@ -31,7 +33,17 @@ func (e *Environment) Set(name string, val Object) Object {
 	return val
 }
 
+func (e *Environment) SetConst(name string, val Object) Object {
+	e.Store[name] = val
+	e.Consts[name] = true
+	return val
+}
+
 func (e *Environment) Update(name string, val Object) (Object, bool) {
+	if isConst, ok := e.Consts[name]; ok && isConst {
+		return nil, false // Cannot update a constant
+	}
+
 	_, ok := e.Store[name]
 	if ok {
 		e.Store[name] = val

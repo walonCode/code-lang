@@ -557,7 +557,7 @@ func checkParserErrors(t *testing.T, p *Parser) {
 }
 
 func TestIfExpression(t *testing.T) {
-	input := `if (x < y) { x }`
+	input := `if (x < y) { x; };`
 
 	l := lexer.New(input)
 	p := New(l)
@@ -753,7 +753,7 @@ func TestIfElseIfExpression(t *testing.T) {
 }
 
 func TestFunctionLiteralParsing(t *testing.T) {
-	input := `fn(x, y) { x + y; }`
+	input := `fn(x, y) { x + y; };`
 
 	l := lexer.New(input)
 	p := New(l)

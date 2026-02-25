@@ -55,6 +55,32 @@ func (ls *LetStatement) String() string {
 func (ls *LetStatement) Line() int   { return ls.Token.Line }
 func (ls *LetStatement) Column() int { return ls.Token.Column }
 
+type ConstStatement struct {
+	Token token.Token
+	Name  *Identifier
+	Value Expression
+}
+
+func (cs *ConstStatement) statementNode()       {}
+func (cs *ConstStatement) TokenLiteral() string { return cs.Token.Literal }
+func (cs *ConstStatement) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(cs.TokenLiteral() + " ")
+	out.WriteString(cs.Name.String())
+	out.WriteString(" = ")
+
+	if cs.Value != nil {
+		out.WriteString(cs.Value.String())
+	}
+
+	out.WriteString(";")
+
+	return out.String()
+}
+func (cs *ConstStatement) Line() int   { return cs.Token.Line }
+func (cs *ConstStatement) Column() int { return cs.Token.Column }
+
 type ReturnStatement struct {
 	Token       token.Token
 	ReturnValue Expression
@@ -199,7 +225,6 @@ func (b *Boolean) String() string       { return b.Token.Literal }
 func (b *Boolean) Line() int            { return b.Token.Line }
 func (b *Boolean) Column() int          { return b.Token.Column }
 
-
 type BlockStatement struct {
 	Token      token.Token
 	Statements []Statement
@@ -281,42 +306,42 @@ func (sl *FloatLiteral) String() string       { return sl.Token.Literal }
 func (sl *FloatLiteral) Line() int            { return sl.Token.Line }
 func (sl *FloatLiteral) Column() int          { return sl.Token.Column }
 
-
 type MemberExpression struct {
-	Token token.Token
-	Object Expression
+	Token    token.Token
+	Object   Expression
 	Property *Identifier
 }
+
 func (m *MemberExpression) expressionNode()      {}
 func (m *MemberExpression) TokenLiteral() string { return m.Token.Literal }
 func (m *MemberExpression) String() string {
 	var out bytes.Buffer
-	
+
 	out.WriteString(m.Object.String())
 	out.WriteString(".")
 	out.WriteString(m.Property.String())
-	
+
 	return out.String()
 }
 func (m *MemberExpression) Line() int   { return m.Token.Line }
 func (m *MemberExpression) Column() int { return m.Token.Column }
 
-
 type BreakStatement struct {
 	Token token.Token
 }
-func (bs *BreakStatement) statementNode() {}
+
+func (bs *BreakStatement) statementNode()       {}
 func (bs *BreakStatement) TokenLiteral() string { return bs.Token.Literal }
-func (bs *BreakStatement) String() string { return "break;" }
-func (bs *BreakStatement) Line() int   { return bs.Token.Line }
-func (bs *BreakStatement) Column() int { return bs.Token.Column }
+func (bs *BreakStatement) String() string       { return "break;" }
+func (bs *BreakStatement) Line() int            { return bs.Token.Line }
+func (bs *BreakStatement) Column() int          { return bs.Token.Column }
 
 type ContinueStatement struct {
-    Token token.Token
+	Token token.Token
 }
 
-func (cs *ContinueStatement) statementNode() {}
+func (cs *ContinueStatement) statementNode()       {}
 func (cs *ContinueStatement) TokenLiteral() string { return cs.Token.Literal }
-func (cs *ContinueStatement) String() string { return "continue;" }
-func (cs *ContinueStatement) Line() int   { return cs.Token.Line }
-func (cs *ContinueStatement) Column() int { return cs.Token.Column }
+func (cs *ContinueStatement) String() string       { return "continue;" }
+func (cs *ContinueStatement) Line() int            { return cs.Token.Line }
+func (cs *ContinueStatement) Column() int          { return cs.Token.Column }

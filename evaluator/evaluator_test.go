@@ -6,6 +6,7 @@ import (
 	"github.com/walonCode/code-lang/lexer"
 	"github.com/walonCode/code-lang/object"
 	"github.com/walonCode/code-lang/parser"
+	"github.com/walonCode/code-lang/std/general"
 )
 
 func testEval(input string) object.Object {
@@ -13,9 +14,15 @@ func testEval(input string) object.Object {
 	p := parser.New(l)
 	program := p.ParsePrograme()
 	env := object.NewEnvironment()
-	
+
+	// Inject builtins for tests
+	genMod := general.Module()
+	for name, obj := range genMod.Members {
+		env.Set(name, obj)
+	}
+
 	evaluator := Evaluator{}
-	
+
 	return evaluator.Eval(program, env)
 }
 
@@ -552,4 +559,47 @@ func TestForLoopSideEffect(t *testing.T) {
     `
 	evaluated := testEval(input)
 	testIntegerObject(t, evaluated, 6) // 1 + 2 + 3 = 6
+}
+
+func TestConstants(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int64
+	}{
+		{"const a = 5; a;", 5},
+		{"const a = 5; let b = a; b;", 5},
+		{"const a = 5 * 5; a;", 25},
+	}
+	for _, tt := range tests {
+		testIntegerObject(t, testEval(tt.input), tt.expected)
+	}
+}
+
+func TestConstantReassignment(t *testing.T) {
+	tests := []struct {
+		input           string
+		expectedMessage string
+	}{
+		{
+			"const a = 5; a = 10;",
+			"cannot reassign to const: a",
+		},
+		{
+			"const a = 5; a += 10;",
+			"cannot reassign to const: a",
+		},
+	}
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		errObj, ok := evaluated.(*object.Error)
+		if !ok {
+			t.Errorf("no error object returned. got=%T(%+v)",
+				evaluated, evaluated)
+			continue
+		}
+		if errObj.Message != tt.expectedMessage {
+			t.Errorf("wrong error message. expected=%q, got=%q",
+				tt.expectedMessage, errObj.Message)
+		}
+	}
 }

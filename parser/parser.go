@@ -113,6 +113,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseBreakStatement()
 	case token.CONTINUE:
 		return p.parseContinueStatement()
+	case token.CONST:
+		return p.parseConstStatement()
 	default:
 		return p.parseExpressionStatement()
 	}
@@ -307,6 +309,29 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 	p.nextToken()
 
 	stmt.ReturnValue = p.parseExpression(LOWEST)
+
+	if !p.expectPeek(token.SEMICOLON) {
+		return nil
+	}
+
+	return stmt
+}
+
+func (p *Parser) parseConstStatement() *ast.ConstStatement {
+	stmt := &ast.ConstStatement{Token: p.curToken}
+	if !p.expectPeek(token.IDENT) {
+		return nil
+	}
+
+	stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+
+	if !p.expectPeek(token.ASSIGN) {
+		return nil
+	}
+
+	p.nextToken()
+
+	stmt.Value = p.parseExpression(LOWEST)
 
 	if !p.expectPeek(token.SEMICOLON) {
 		return nil

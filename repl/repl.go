@@ -11,12 +11,26 @@ import (
 	"github.com/walonCode/code-lang/lexer"
 	"github.com/walonCode/code-lang/object"
 	"github.com/walonCode/code-lang/parser"
+	"github.com/walonCode/code-lang/std/general"
+	"github.com/walonCode/code-lang/symbol"
 )
 
 const PROMPT = ">> "
 
 func Start(out io.Writer) {
 	env := object.NewEnvironment()
+
+	// Inject basic builtins for the REPL
+	genMod := general.Module()
+	for name, obj := range genMod.Members {
+		env.Set(name, obj)
+	}
+
+	builder := symbol.NewBuilder()
+	// Pre-populate symbol table with builtins
+	for name := range genMod.Members {
+		builder.Define(name, symbol.FUNCTION)
+	}
 
 	home, _ := os.UserHomeDir()
 	historyPath := filepath.Join(home, ".code_lang_history")
@@ -54,7 +68,15 @@ func Start(out io.Writer) {
 			printParserError(out, p.Errors())
 			continue
 		}
-		
+
+		// Run static analysis
+		builder.Visit(programe)
+		if len(builder.Errors) != 0 {
+			printSymbolError(out, builder.Errors)
+			builder.Errors = nil // Clear errors for next line
+			continue
+		}
+
 		evaluator := &evaluator.Evaluator{}
 
 		evaluated := evaluator.Eval(programe, env)
@@ -63,6 +85,13 @@ func Start(out io.Writer) {
 			io.WriteString(out, "\n")
 		}
 
+	}
+}
+
+func printSymbolError(out io.Writer, errors []string) {
+	io.WriteString(out, " static analysis errors:\n")
+	for _, msg := range errors {
+		io.WriteString(out, "\t"+msg+"\n")
 	}
 }
 
@@ -94,9 +123,26 @@ func Execute(source string, out io.Writer) {
 		printParserError(out, p.Errors())
 		return
 	}
-	
+
+	env := object.NewEnvironment()
+	genMod := general.Module()
+	for name, obj := range genMod.Members {
+		env.Set(name, obj)
+	}
+
+	builder := symbol.NewBuilder()
+	for name := range genMod.Members {
+		builder.Define(name, symbol.FUNCTION)
+	}
+
+	builder.Visit(program)
+	if len(builder.Errors) != 0 {
+		printSymbolError(out, builder.Errors)
+		return
+	}
+
 	evaluator := evaluator.Evaluator{}
-	evaluated := evaluator.Eval(program, object.NewEnvironment())
+	evaluated := evaluator.Eval(program, env)
 	if evaluated != nil && evaluated.Type() == object.ERROR_OBJ {
 		io.WriteString(out, evaluated.Inspect())
 		io.WriteString(out, "\n")
