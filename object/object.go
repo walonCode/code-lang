@@ -32,8 +32,8 @@ const (
 	TIME_OBJ         = "TIME"
 	STRUCT_TYPE      = "STRUCT"
 	STRUCT_INSTANCE  = "STRUCT"
-	BREAK_0BJ = "BREAK"
-	CONTINUE_OBJ = "CONTINUE"
+	BREAK_OBJ        = "BREAK"
+	CONTINUE_OBJ     = "CONTINUE"
 )
 
 // this allows us only to have on Bolean object and Null object
@@ -265,9 +265,11 @@ func (s *StructInstance) Type() ObjectType { return "STRUCT_INSTANCE" }
 func (s *StructInstance) Inspect() string  { return s.TypeName }
 
 type Break struct{}
-func (b *Break) Type() ObjectType { return "STRUCT_INSTANCE" }
+
+func (b *Break) Type() ObjectType { return BREAK_OBJ }
 func (b *Break) Inspect() string  { return "break" }
 
 type Continue struct{}
-func (c *Continue) Type() ObjectType { return "STRUCT_INSTANCE" }
-func (c *Continue) Inspect() string  { return "break" }
+
+func (c *Continue) Type() ObjectType { return CONTINUE_OBJ }
+func (c *Continue) Inspect() string  { return "continue" }

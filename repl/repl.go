@@ -77,7 +77,7 @@ func Start(out io.Writer) {
 			continue
 		}
 
-		evaluator := &evaluator.Evaluator{}
+		evaluator := &evaluator.Evaluator{Resolutions: builder.Resolutions}
 
 		evaluated := evaluator.Eval(programe, env)
 		if evaluated != nil {
@@ -141,7 +141,7 @@ func Execute(source string, out io.Writer) {
 		return
 	}
 
-	evaluator := evaluator.Evaluator{}
+	evaluator := evaluator.Evaluator{Resolutions: builder.Resolutions}
 	evaluated := evaluator.Eval(program, env)
 	if evaluated != nil && evaluated.Type() == object.ERROR_OBJ {
 		io.WriteString(out, evaluated.Inspect())

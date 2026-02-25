@@ -7,9 +7,10 @@ import (
 )
 
 type Builder struct {
-	Global  *Scope
-	Current *Scope
-	Errors  []string
+	Global      *Scope
+	Current     *Scope
+	Errors      []string
+	Resolutions map[ast.Node]int
 }
 
 func (b *Builder) error(line, col int, format string, args ...any) {
@@ -19,8 +20,9 @@ func (b *Builder) error(line, col int, format string, args ...any) {
 func NewBuilder() *Builder {
 	global := NewScope("global", nil)
 	return &Builder{
-		Global:  global,
-		Current: global,
+		Global:      global,
+		Current:     global,
+		Resolutions: make(map[ast.Node]int),
 	}
 }
 
@@ -144,8 +146,10 @@ func (b *Builder) VisitExpression(expr ast.Expression) {
 		if e == nil {
 			return
 		}
-		if sym := b.Resolve(e.Value); sym == nil {
+		if _, distance := b.Current.ResolveWithDistance(e.Value); distance == -1 {
 			b.error(e.Line(), e.Column(), "undefined identifier: %s", e.Value)
+		} else {
+			b.Resolutions[e] = distance
 		}
 	case *ast.IntegerLiteral, *ast.Boolean, *ast.StringLiteral, *ast.FloatLiteral, *ast.CharLiteral:
 		// No symbols to define

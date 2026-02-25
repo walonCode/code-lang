@@ -16,14 +16,15 @@ import (
 var moduleCache = map[string]*object.Module{}
 
 type Evaluator struct {
-	loopDepth int
+	loopDepth   int
+	Resolutions map[ast.Node]int
 }
 
 func (e *Evaluator) Eval(node ast.Node, env *object.Environment) object.Object {
 	switch node := node.(type) {
 	//statement
 	case *ast.Program:
-		return e.evalProgram(node, *env)
+		return e.evalProgram(node, env)
 	case *ast.ExpressionStatement:
 		return e.Eval(node.Expression, env)
 	case *ast.ReturnStatement:
@@ -138,11 +139,11 @@ func (e *Evaluator) Eval(node ast.Node, env *object.Environment) object.Object {
 		}
 		return evalInfixExpression(node, left, right)
 	case *ast.BlockStatement:
-		return e.evalBlockStatements(node, *env)
+		return e.evalBlockStatements(node, env)
 	case *ast.IfExpression:
-		return e.evalIfExpression(node, *env)
+		return e.evalIfExpression(node, env)
 	case *ast.Identifier:
-		return evalIdentifier(node, env)
+		return e.evalIdentifier(node, env)
 	case *ast.FunctionLiteral:
 		params := node.Parameters
 		body := node.Body
@@ -259,7 +260,7 @@ func (e *Evaluator) evalAssignment(node *ast.InfixExpression, env *object.Enviro
 		if node.Operator == "=" {
 			finalVal = val
 		} else {
-			currentVal := evalIdentifier(left, env)
+			currentVal := e.evalIdentifier(left, env)
 			if isError(currentVal) {
 				return currentVal
 			}
@@ -270,8 +271,11 @@ func (e *Evaluator) evalAssignment(node *ast.InfixExpression, env *object.Enviro
 			return finalVal
 		}
 
-		if isConst, ok := env.Consts[left.Value]; ok && isConst {
-			return object.NewError(node.Line(), node.Column(), "cannot reassign to const: %s", left.Value)
+		if dist, ok := e.Resolutions[left]; ok {
+			if !env.UpdateAt(dist, left.Value, finalVal) {
+				return object.NewError(node.Line(), node.Column(), "cannot reassign to const: %s", left.Value)
+			}
+			return finalVal
 		}
 
 		_, updated := env.Update(left.Value, finalVal)
@@ -626,17 +630,23 @@ func (e *Evaluator) evalExpression(exps []ast.Expression, env *object.Environmen
 	return result
 }
 
-func evalIdentifier(node *ast.Identifier, env *object.Environment) object.Object {
+func (e *Evaluator) evalIdentifier(node *ast.Identifier, env *object.Environment) object.Object {
+	if dist, ok := e.Resolutions[node]; ok {
+		if val, ok := env.GetAt(dist, node.Value); ok {
+			return val
+		}
+	}
+
 	if val, ok := env.Get(node.Value); ok {
 		return val
 	}
 	return object.NewError(node.Line(), node.Column(), "identifier not found: %s", node.Value)
 }
 
-func (e *Evaluator) evalProgram(program *ast.Program, env object.Environment) object.Object {
+func (e *Evaluator) evalProgram(program *ast.Program, env *object.Environment) object.Object {
 	var result object.Object
 	for _, statement := range program.Statements {
-		result = e.Eval(statement, &env)
+		result = e.Eval(statement, env)
 
 		switch result := result.(type) {
 		case *object.ReturnValue:
@@ -649,15 +659,16 @@ func (e *Evaluator) evalProgram(program *ast.Program, env object.Environment) ob
 	return result
 }
 
-func (e *Evaluator) evalBlockStatements(block *ast.BlockStatement, env object.Environment) object.Object {
+func (e *Evaluator) evalBlockStatements(block *ast.BlockStatement, env *object.Environment) object.Object {
 	var result object.Object
+	blockEnv := object.NewEnclosedEnvironment(env)
 
 	for _, statement := range block.Statements {
-		result = e.Eval(statement, &env)
+		result = e.Eval(statement, blockEnv)
 
 		if result != nil {
 			rt := result.Type()
-			if rt == object.RETURN_VALUE_OBJ || rt == object.ERROR_OBJ {
+			if rt == object.RETURN_VALUE_OBJ || rt == object.ERROR_OBJ || rt == object.BREAK_OBJ || rt == object.CONTINUE_OBJ {
 				return result
 			}
 		}
@@ -666,29 +677,29 @@ func (e *Evaluator) evalBlockStatements(block *ast.BlockStatement, env object.En
 	return result
 }
 
-func (e *Evaluator) evalIfExpression(node *ast.IfExpression, env object.Environment) object.Object {
-	condition := e.Eval(node.Condition, &env)
+func (e *Evaluator) evalIfExpression(node *ast.IfExpression, env *object.Environment) object.Object {
+	condition := e.Eval(node.Condition, env)
 
 	if isError(condition) {
 		return condition
 	}
 
 	if isTruthy(condition) {
-		return e.Eval(node.Consequence, &env)
+		return e.Eval(node.Consequence, env)
 	}
 
 	for _, v := range node.IfElse {
-		condition := e.Eval(v.Condition, &env)
+		condition := e.Eval(v.Condition, env)
 		if isError(condition) {
 			return condition
 		}
 		if isTruthy(condition) {
-			return e.Eval(v.Consequence, &env)
+			return e.Eval(v.Consequence, env)
 		}
 	}
 
 	if node.Alternative != nil {
-		return e.Eval(node.Alternative, &env)
+		return e.Eval(node.Alternative, env)
 	}
 
 	return object.NULL

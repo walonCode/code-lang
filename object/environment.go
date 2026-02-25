@@ -54,3 +54,32 @@ func (e *Environment) Update(name string, val Object) (Object, bool) {
 	}
 	return nil, false
 }
+
+func (e *Environment) GetAt(distance int, name string) (Object, bool) {
+	ancestor := e.ancestor(distance)
+	if ancestor == nil {
+		return nil, false
+	}
+	obj, ok := ancestor.Store[name]
+	return obj, ok
+}
+
+func (e *Environment) UpdateAt(distance int, name string, val Object) bool {
+	ancestor := e.ancestor(distance)
+	if ancestor == nil {
+		return false
+	}
+	if isConst, ok := ancestor.Consts[name]; ok && isConst {
+		return false
+	}
+	ancestor.Store[name] = val
+	return true
+}
+
+func (e *Environment) ancestor(distance int) *Environment {
+	curr := e
+	for i := 0; i < distance && curr != nil; i++ {
+		curr = curr.outer
+	}
+	return curr
+}

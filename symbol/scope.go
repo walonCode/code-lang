@@ -1,14 +1,14 @@
 package symbol
 
 type Scope struct {
-	Name string
+	Name    string
 	Parent  *Scope
 	Symbols map[string]*Symbol
 }
 
 func NewScope(name string, parent *Scope) *Scope {
 	return &Scope{
-		Name: name,
+		Name:    name,
 		Parent:  parent,
 		Symbols: make(map[string]*Symbol),
 	}
@@ -26,4 +26,17 @@ func (s *Scope) Resolve(name string) *Symbol {
 		return s.Parent.Resolve(name)
 	}
 	return nil
+}
+
+func (s *Scope) ResolveWithDistance(name string) (*Symbol, int) {
+	distance := 0
+	curr := s
+	for curr != nil {
+		if sym, ok := curr.Symbols[name]; ok {
+			return sym, distance
+		}
+		curr = curr.Parent
+		distance++
+	}
+	return nil, -1
 }

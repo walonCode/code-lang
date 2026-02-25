@@ -7,6 +7,7 @@ import (
 	"github.com/walonCode/code-lang/object"
 	"github.com/walonCode/code-lang/parser"
 	"github.com/walonCode/code-lang/std/general"
+	"github.com/walonCode/code-lang/symbol"
 )
 
 func testEval(input string) object.Object {
@@ -21,7 +22,15 @@ func testEval(input string) object.Object {
 		env.Set(name, obj)
 	}
 
-	evaluator := Evaluator{}
+	builder := symbol.NewBuilder()
+	// Pre-populate symbol table with builtins for tests
+	for name := range genMod.Members {
+		builder.Define(name, symbol.FUNCTION)
+	}
+
+	builder.Visit(program)
+
+	evaluator := Evaluator{Resolutions: builder.Resolutions}
 
 	return evaluator.Eval(program, env)
 }
