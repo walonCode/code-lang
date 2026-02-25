@@ -19,7 +19,7 @@ type Evaluator struct {
 	loopDepth int
 }
 
-func(e *Evaluator) Eval(node ast.Node, env *object.Environment) object.Object {
+func (e *Evaluator) Eval(node ast.Node, env *object.Environment) object.Object {
 	switch node := node.(type) {
 	//statement
 	case *ast.Program:
@@ -48,14 +48,14 @@ func(e *Evaluator) Eval(node ast.Node, env *object.Environment) object.Object {
 		defaults := make(map[string]object.Object)
 		for field, exp := range node.Fields {
 			val := e.Eval(exp, env)
-			if isError(val){
+			if isError(val) {
 				return val
 			}
 			defaults[field] = val
 		}
-		
+
 		structType := &object.StructType{
-			Name: node.Name.Value,
+			Name:     node.Name.Value,
 			Defaults: defaults,
 		}
 		env.Set(node.Name.Value, structType)
@@ -93,18 +93,18 @@ func(e *Evaluator) Eval(node ast.Node, env *object.Environment) object.Object {
 		}
 		fields := make(map[string]object.Object)
 		maps.Copy(st.Defaults, fields)
-		
+
 		for k, exp := range node.Fields {
 			val := e.Eval(exp, env)
-			if isError(val){
+			if isError(val) {
 				return val
 			}
 			fields[k] = val
 		}
-		
+
 		return &object.StructInstance{
 			TypeName: st.Name,
-			Fields: fields,
+			Fields:   fields,
 		}
 	case *ast.PrefixExpression:
 		right := e.Eval(node.Right, env)
@@ -115,6 +115,11 @@ func(e *Evaluator) Eval(node ast.Node, env *object.Environment) object.Object {
 	case *ast.InfixExpression:
 		if isAssignment(node.Operator) {
 			return e.evalAssignment(node, env)
+		}
+
+		// Short-circuit logical operators
+		if node.Operator == "&&" || node.Operator == "||" {
+			return e.evalLogicalExpression(node, env)
 		}
 
 		left := e.Eval(node.Left, env)
@@ -180,50 +185,50 @@ func(e *Evaluator) Eval(node ast.Node, env *object.Environment) object.Object {
 	return nil
 }
 
-func(e *Evaluator)evalBreakStatement(node *ast.BreakStatement)object.Object{
+func (e *Evaluator) evalBreakStatement(node *ast.BreakStatement) object.Object {
 	if e.loopDepth == 0 {
 		return object.NewError(node.Line(), node.Column(), "break not inside a loop")
 	}
-	
+
 	return &object.Break{}
 }
 
-func(e *Evaluator)evalContinueStatement(node *ast.ContinueStatement)object.Object{
+func (e *Evaluator) evalContinueStatement(node *ast.ContinueStatement) object.Object {
 	if e.loopDepth == 0 {
 		return object.NewError(node.Line(), node.Column(), "continue not inside a loop")
 	}
-	
+
 	return &object.Continue{}
 }
 
-func(e *Evaluator) evalImportStatement(node *ast.ImportStatement, env *object.Environment)object.Object{
+func (e *Evaluator) evalImportStatement(node *ast.ImportStatement, env *object.Environment) object.Object {
 	modulePath := node.Path
-	
-	if mod, ok := moduleCache[modulePath];ok {
+
+	if mod, ok := moduleCache[modulePath]; ok {
 		env.Set(modulePath, mod)
 		return mod
 	}
-	
+
 	fileName := filepath.Clean(modulePath + ".cl")
 	content, err := os.ReadFile(fileName)
 	if err != nil {
-		return object.NewError(node.Line(), node.Column(), "could not read module %q : %s",modulePath, err)
+		return object.NewError(node.Line(), node.Column(), "could not read module %q : %s", modulePath, err)
 	}
-	
+
 	moduleEnv := object.NewEnclosedEnvironment(env)
-	
+
 	l := lexer.New(string(content))
 	p := parser.New(l)
 	programe := p.ParsePrograme()
-	
+
 	e.Eval(programe, moduleEnv)
-	
-	moduleobj := &object.Module{ Members: map[string]object.Object{}}
+
+	moduleobj := &object.Module{Members: map[string]object.Object{}}
 	maps.Copy(moduleobj.Members, moduleEnv.Store)
 	env.Set(modulePath, moduleobj)
-	
+
 	moduleCache[modulePath] = moduleobj
-	
+
 	return moduleobj
 }
 
@@ -236,7 +241,7 @@ func isAssignment(op string) bool {
 	}
 }
 
-func (e *Evaluator)evalAssignment(node *ast.InfixExpression, env *object.Environment) object.Object {
+func (e *Evaluator) evalAssignment(node *ast.InfixExpression, env *object.Environment) object.Object {
 	val := e.Eval(node.Right, env)
 	if isError(val) {
 		return val
@@ -356,10 +361,10 @@ func evalAssignMember(obj object.Object, node *ast.MemberExpression, val object.
 		return val
 	case *object.Module:
 		obj.Members[node.Property.Value] = val
-		return val	
+		return val
 	case *object.Server:
 		obj.Members[node.Property.Value] = val
-		return val	
+		return val
 	default:
 		return object.NewError(node.Line(), node.Column(), "cannot assign to property %s on %s", node.Property.Value, obj.Type())
 	}
@@ -378,14 +383,14 @@ func evalMemberExpression(obj object.Object, node *ast.MemberExpression) object.
 		if !ok {
 			return object.NewError(node.Line(), node.Column(), "module has not member %s", node.Property.Value)
 		}
-		
+
 		return val
 	case *object.Server:
 		val, ok := obj.Members[node.Property.Value]
 		if !ok {
 			return object.NewError(node.Line(), node.Column(), "server has not member %s", node.Property.Value)
 		}
-		
+
 		return val
 	case *object.StructInstance:
 		val, ok := obj.Fields[node.Property.Value]
@@ -398,12 +403,12 @@ func evalMemberExpression(obj object.Object, node *ast.MemberExpression) object.
 	}
 }
 
-func (e *Evaluator)evalWhileExpression(node *ast.WhileExpression, env *object.Environment) object.Object {
+func (e *Evaluator) evalWhileExpression(node *ast.WhileExpression, env *object.Environment) object.Object {
 	var result object.Object = object.NULL
-	
+
 	e.loopDepth++
-	defer func(){ e.loopDepth-- }()
-	
+	defer func() { e.loopDepth-- }()
+
 	for {
 		if node.Condition != nil {
 			condition := e.Eval(node.Condition, env)
@@ -418,14 +423,14 @@ func (e *Evaluator)evalWhileExpression(node *ast.WhileExpression, env *object.En
 
 		result = e.Eval(node.Body, env)
 		switch result.(type) {
-			case *object.Break:
-				return object.NULL
-			case *object.Continue:
-				continue
-			case *object.ReturnValue:
-				return result
+		case *object.Break:
+			return object.NULL
+		case *object.Continue:
+			continue
+		case *object.ReturnValue:
+			return result
 		}
-		
+
 		if result != nil {
 			rt := result.Type()
 			if rt == object.RETURN_VALUE_OBJ || rt == object.ERROR_OBJ {
@@ -437,7 +442,7 @@ func (e *Evaluator)evalWhileExpression(node *ast.WhileExpression, env *object.En
 	return result
 }
 
-func (e *Evaluator)evalForExpression(node *ast.ForExpression, env *object.Environment) object.Object {
+func (e *Evaluator) evalForExpression(node *ast.ForExpression, env *object.Environment) object.Object {
 	forEnv := object.NewEnclosedEnvironment(env)
 	if node.Init != nil {
 		initRes := e.Eval(node.Init, forEnv)
@@ -448,8 +453,8 @@ func (e *Evaluator)evalForExpression(node *ast.ForExpression, env *object.Enviro
 
 	var result object.Object = object.NULL
 	e.loopDepth++
-	defer func(){ e.loopDepth-- }()
-	
+	defer func() { e.loopDepth-- }()
+
 	for {
 		if node.Condition != nil {
 			condition := e.Eval(node.Condition, forEnv)
@@ -460,18 +465,17 @@ func (e *Evaluator)evalForExpression(node *ast.ForExpression, env *object.Enviro
 				break
 			}
 		}
-		
 
 		result = e.Eval(node.Body, forEnv)
 		switch result.(type) {
-			case *object.Break:
-				return object.NULL
-			case *object.Continue:
-				continue
-			case *object.ReturnValue:
-				return result
+		case *object.Break:
+			return object.NULL
+		case *object.Continue:
+			continue
+		case *object.ReturnValue:
+			return result
 		}
-		
+
 		if result != nil {
 			rt := result.Type()
 			if rt == object.RETURN_VALUE_OBJ || rt == object.ERROR_OBJ {
@@ -490,7 +494,7 @@ func (e *Evaluator)evalForExpression(node *ast.ForExpression, env *object.Enviro
 	return result
 }
 
-func(e *Evaluator) evalHashLiteral(node *ast.HashLiteral, env *object.Environment) object.Object {
+func (e *Evaluator) evalHashLiteral(node *ast.HashLiteral, env *object.Environment) object.Object {
 	pairs := make(map[object.HashKey]object.HashPair)
 
 	for keyNode, valueNode := range node.Pairs {
@@ -569,7 +573,7 @@ func evalArrayIndexExpression(left, index object.Object) object.Object {
 	return arrayObj.Elements[idx]
 }
 
-func(e *Evaluator) applyFunction(fn object.Object, args []object.Object, node *ast.CallExpression) object.Object {
+func (e *Evaluator) applyFunction(fn object.Object, args []object.Object, node *ast.CallExpression) object.Object {
 	switch fn := fn.(type) {
 	case *object.Function:
 		extendedEnv := extendFunctionEnv(fn, args)
@@ -599,7 +603,7 @@ func unwrapReturnValue(obj object.Object) object.Object {
 	return obj
 }
 
-func (e *Evaluator)evalExpression(exps []ast.Expression, env *object.Environment) []object.Object {
+func (e *Evaluator) evalExpression(exps []ast.Expression, env *object.Environment) []object.Object {
 	var result []object.Object
 
 	for _, f := range exps {
@@ -619,7 +623,7 @@ func evalIdentifier(node *ast.Identifier, env *object.Environment) object.Object
 	return object.NewError(node.Line(), node.Column(), "identifier not found: %s", node.Value)
 }
 
-func(e *Evaluator) evalProgram(program *ast.Program, env object.Environment) object.Object {
+func (e *Evaluator) evalProgram(program *ast.Program, env object.Environment) object.Object {
 	var result object.Object
 	for _, statement := range program.Statements {
 		result = e.Eval(statement, &env)
@@ -635,7 +639,7 @@ func(e *Evaluator) evalProgram(program *ast.Program, env object.Environment) obj
 	return result
 }
 
-func(e *Evaluator) evalBlockStatements(block *ast.BlockStatement, env object.Environment) object.Object {
+func (e *Evaluator) evalBlockStatements(block *ast.BlockStatement, env object.Environment) object.Object {
 	var result object.Object
 
 	for _, statement := range block.Statements {
@@ -652,7 +656,7 @@ func(e *Evaluator) evalBlockStatements(block *ast.BlockStatement, env object.Env
 	return result
 }
 
-func (e *Evaluator)evalIfExpression(node *ast.IfExpression, env object.Environment) object.Object {
+func (e *Evaluator) evalIfExpression(node *ast.IfExpression, env object.Environment) object.Object {
 	condition := e.Eval(node.Condition, &env)
 
 	if isError(condition) {
@@ -693,8 +697,35 @@ func isTruthy(obj object.Object) bool {
 	}
 }
 
+// evalLogicalExpression handles && and || with short-circuit evaluation.
+// For &&: returns the first falsy value, or the right value if both are truthy.
+// For ||: returns the first truthy value, or the right value if both are falsy.
+func (e *Evaluator) evalLogicalExpression(node *ast.InfixExpression, env *object.Environment) object.Object {
+	left := e.Eval(node.Left, env)
+	if isError(left) {
+		return left
+	}
+
+	if node.Operator == "&&" {
+		if !isTruthy(left) {
+			return left
+		}
+		return e.Eval(node.Right, env)
+	}
+
+	// node.Operator == "||"
+	if isTruthy(left) {
+		return left
+	}
+	return e.Eval(node.Right, env)
+}
+
 func evalInfixExpression(node *ast.InfixExpression, left, right object.Object) object.Object {
 	switch {
+	case node.Operator == "&&":
+		return nativeBoolToBooleanObject(isTruthy(left) && isTruthy(right))
+	case node.Operator == "||":
+		return nativeBoolToBooleanObject(isTruthy(left) || isTruthy(right))
 	case left.Type() == object.INTEGER_OBJ && right.Type() == object.INTEGER_OBJ:
 		return evalIntegerInfixExpression(node, left, right)
 	case left.Type() == object.FLOAT_OBJ && right.Type() == object.FLOAT_OBJ:

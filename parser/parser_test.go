@@ -218,6 +218,8 @@ func TestParsingInfixExpressions(t *testing.T) {
 		{"5 *= 5;", 5, "*=", 5},
 		{"5 /= 5;", 5, "/=", 5},
 		{"5 %= 5;", 5, "%=", 5},
+		{"5 && 5;", 5, "&&", 5},
+		{"5 || 5;", 5, "||", 5},
 	}
 
 	for _, tt := range infixTests {
@@ -1283,7 +1285,7 @@ func TestStructLiteral(t *testing.T) {
 		t.Fatalf("stmt.Expression is not *ast.StructLiteral. got=%T", stmt.Expression)
 	}
 
-	if structLit.Fields["name"].String() != "Alice"{
+	if structLit.Fields["name"].String() != "Alice" {
 		t.Errorf("structLit.Fields['name'] not 'Alice'. got=%s", structLit.Fields["name"].String())
 	}
 
@@ -1292,8 +1294,7 @@ func TestStructLiteral(t *testing.T) {
 	}
 }
 
-
-func TestBreakStatement(t *testing.T){
+func TestBreakStatement(t *testing.T) {
 	input := `break;`
 
 	l := lexer.New(input)
@@ -1317,7 +1318,7 @@ func TestBreakStatement(t *testing.T){
 	}
 }
 
-func TestContinueStatement(t *testing.T){
+func TestContinueStatement(t *testing.T) {
 	input := `continue;`
 
 	l := lexer.New(input)
@@ -1340,4 +1341,3 @@ func TestContinueStatement(t *testing.T){
 		t.Errorf("continueStmt.TokenLiteral() not 'continue'. got=%s", continueStmt.TokenLiteral())
 	}
 }
-	
