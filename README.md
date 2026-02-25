@@ -22,6 +22,9 @@ Code-Lang is a modern, interpreted programming language written in Go. It began 
   - `while` loops for simple iteration.
   - `for` loops for structured iteration.
   - `break` and `continue` inside loops.
+- **Static Analysis:**
+  - **Symbol Table:** Tracks variable scopes, identifier resolution, and constant enforcement.
+  - **Pre-execution Checks:** Catches undefined variables and illegal reassignments before running code.
 - **Support for Comments:** Single-line (`#`) and multi-line (`/* */`).
 - **Standard Operators:**
   - Arithmetic: `+`, `-`, `*`, `/`, `%` (Modulo)
@@ -97,6 +100,9 @@ let isLearning = true;
 let add = fn(a, b) {
     return a + b;
 };
+
+const PI = 3.14159;
+# PI = 3.14; # Error: cannot reassign to const
 
 print(add(10, 15)); # Output: 25
 ```
@@ -264,6 +270,8 @@ print(typeof([]));   # ARRAY
 | Member Access (dot notation) | ✅ Done |
 | Compound Assignment (`+=`, `-=`, etc.) | ✅ Done |
 | Structs (define custom types & create instances) | ✅ Done |
+| Constants (`const`) | ✅ Done |
+| Static Analysis (Symbol Table & Scope Awareness) | ✅ Done |
 | Web Server (request/response handling) | 🚧 WIP |
 | Struct Methods | 🔜 Planned |
 | `fs` module (file system access) | 🔜 Planned |
