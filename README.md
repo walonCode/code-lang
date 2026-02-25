@@ -21,20 +21,21 @@ Code-Lang is a modern, interpreted programming language written in Go. It began 
   - `if-elseif-else` expressions (everything is an expression!).
   - `while` loops for simple iteration.
   - `for` loops for structured iteration.
+  - `break` and `continue` inside loops.
 - **Support for Comments:** Single-line (`#`) and multi-line (`/* */`).
 - **Standard Operators:**
   - Arithmetic: `+`, `-`, `*`, `/`, `%` (Modulo)
-  - Advanced: `**` (Power), `//` (Floor Division), `=` (Assignment)
+  - Advanced: `**` (Power), `//` (Floor Division)
   - Comparison: `==`, `!=`, `<`, `>`, `<=`, `>=`
-  - Logical: `!` (Negation)
+  - Logical: `&&` (AND), `||` (OR) — **with short-circuit evaluation** — and `!` (Negation)
+  - Compound Assignment: `+=`, `-=`, `*=`, `/=`, `%=`, `**=`, `//=`
 - **Built-in Functions:** `print`, `printf`, `typeof`, `len`, `push`, and more.
 - **Module System:** Import other `.cl` files or built-in modules using `import "module"`.
-- **Member Access:** Dot notation (`obj.prop`) for Hashes, Modules, and Servers.
+- **Member Access:** Dot notation (`obj.prop`) for Hashes, Modules, Structs, and Servers.
 - **Networking:** Built-in `http` client (GET, POST, etc.) and `net.server` for creating web servers.
 - **JSON Support:** Built-in `json.parse()` and `json.stringify()`.
 - **Standard Library:** Go-backed modules for `math`, `strings`, `time`, `hash`, `os`, `json`, and `net`.
-- **Compound Assignment:** Supports `+=`, `-=`, `*=`, `/=`, etc.
-- **REPL:** Interactive shell with precise line/column error tracking.
+- **REPL:** Interactive shell with persistent history and precise line/column error tracking.
 - **File Execution:** Run scripts with the `.cl` extension.
 
 ---
@@ -43,7 +44,7 @@ Code-Lang is a modern, interpreted programming language written in Go. It began 
 
 ### Prerequisites
 
-- [Go](https://golang.org/dl/) (version 1.25.3 or higher recommended)
+- [Go](https://golang.org/dl/) (version 1.21 or higher recommended)
 
 ### Installation
 
@@ -97,16 +98,18 @@ let add = fn(a, b) {
     return a + b;
 };
 
-print(add(10, 15)); // Output: 25
+print(add(10, 15)); # Output: 25
 ```
 
-### Arrays and Indexing
+### Arrays and Hashes
 
 ```rust
 let fibonacci = [0, 1, 1, 2, 3, 5, 8];
-
+print(fibonacci[3]); # 2
 
 let person = {"name": "Alice", "age": 30};
+print(person.name); # Alice
+```
 
 ### Structs
 
@@ -119,7 +122,7 @@ struct User {
 let u = User { name: "Walon", role: "Admin" };
 let guest = User {}; # Uses default values
 
-print(u.name); # Walon
+print(u.name);     # Walon
 print(guest.name); # Guest
 ```
 
@@ -136,27 +139,49 @@ let result = if (x > 10) {
 };
 ```
 
+### Logical Operators (`&&` / `||`)
+
+`&&` and `||` use **short-circuit evaluation** — the right side is only evaluated when necessary.
+
+```rust
+let a = true;
+let b = false;
+
+print(a && b);  # false
+print(a || b);  # true
+print(!a);      # false
+
+# Short-circuit: the right side is never evaluated when
+# the result is already known from the left side.
+let x = false && someUndefinedFn(); # safe — right side skipped
+let y = true  || someUndefinedFn(); # safe — right side skipped
+
+# Combine with comparisons
+let age = 20;
+let hasId = true;
+if (age >= 18 && hasId) {
+    print("Access granted");
+};
+```
+
 ### Loops
 
 ```rust
-// While loop
+# While loop
 let i = 0;
 while (i < 5) {
     print(i);
-    i = i + 1;
+    i += 1;
 };
 
-// For loop
-for (let j = 0; j < 5; j += 1) {
+# For loop with break and continue
+for (let j = 0; j < 10; j += 1) {
     if (j == 2) { continue; };
-    if (j == 4) { break; };
+    if (j == 6) { break; };
     print(j);
 };
 ```
 
-### Modules & Member Access
-
-```rust
 ### Standard Library Examples
 
 #### Networking & JSON
@@ -194,7 +219,7 @@ print(strings.trim(strings.to_upper(s))); # HELLO WORLD
 let user = {"name": "walon", "age": 25};
 if (hash.has_key(user, "name")) {
     print("User keys:", hash.keys(user));
-}
+};
 ```
 
 #### OS & Environment
@@ -206,41 +231,45 @@ print("API Key:", os.get_env("API_KEY"));
 os.exit(0);
 ```
 
-### Advanced Features
+### Miscellaneous
 
 ```rust
-// Comments
-# This is a single line comment
+# Single-line comment
 /* 
-   This is a 
-   multi-line comment 
+   Multi-line comment 
 */
 
-// Formatted print
+# Formatted print
 let name = "Alice";
-printf("Hello, %s!", name);
+printf("Hello, %s!\n", name);
 
-// Type checking
-print(typeof(10)); // Output: INTEGER
-print(typeof("hi")); // Output: STRING
+# Type checking
+print(typeof(10));   # INTEGER
+print(typeof("hi")); # STRING
+print(typeof([]));   # ARRAY
 ```
 
 ---
 
 ## 🗺 Roadmap
 
-We are constantly working to make Code-Lang better. Here is what's coming next:
-
-- [x] **Better Error Reporting:** Line and column tracking for precise debugging.
-- [x] **Comments:** Support for single and multi-line comments.
-- [x] **Loops:** Implementing `while` and `for` loops with `break` and `continue` support.
-- [ ] **Logical Operators:** Adding `&&` (AND) and `||` (OR) with short-circuiting.
-- [x] **Standard Library (Internal):** Modules for `fmt`, `math`, `strings`, `time`, `hash`, `os`, `net/http`, and `json`.
-- [x] **Import System:** Ability to include other `.cl` files.
-- [x] **Member Access:** Dot notation for objects, modules, and structs.
-- [x] **Compound Assignment:** Support for `+=`, `-=`, etc.
-- [x] **Structs:** Support for defining custom types and creating instances.
-- [WIP] **Web Server:** Request/Response handling and server state.
+| Feature | Status |
+|---|---|
+| Better Error Reporting (line & column tracking) | ✅ Done |
+| Comments (single & multi-line) | ✅ Done |
+| `while` and `for` loops with `break`/`continue` | ✅ Done |
+| Logical Operators `&&` / `||` with short-circuiting | ✅ Done |
+| Standard Library (`math`, `strings`, `time`, `hash`, `os`, `json`, `net`) | ✅ Done |
+| Import System (`.cl` files) | ✅ Done |
+| Member Access (dot notation) | ✅ Done |
+| Compound Assignment (`+=`, `-=`, etc.) | ✅ Done |
+| Structs (define custom types & create instances) | ✅ Done |
+| Web Server (request/response handling) | 🚧 WIP |
+| Struct Methods | 🔜 Planned |
+| `fs` module (file system access) | 🔜 Planned |
+| REPL Multi-line Support | 🔜 Planned |
+| VSCode Extension (syntax highlighting) | 🔜 Planned |
+| LSP (Language Server Protocol) | 🔜 Planned |
 
 ---
 
