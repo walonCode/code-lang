@@ -35,6 +35,10 @@ const (
 	SQUARE = "**"
 	FLOOR = "//"
 	
+	//logic operator
+	AND = "&&"
+	OR = "||"
+	
 	SLASH = "/"
 	LT = "<"
 	GT = ">"

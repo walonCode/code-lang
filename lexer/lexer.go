@@ -151,6 +151,18 @@ func (l *Lexer) NextToken() token.Token {
 		}
 	case ',':
 		tok = newToken(token.COMMA, l.ch, currentLine, currentColumn)
+	case '|':
+		if l.peakChar() == '|'{
+			ch := l.ch
+			l.readChar()
+			tok = token.Token{Type: token.OR, Literal: string(ch)+string(l.ch), Line:currentLine, Column: currentColumn}
+		}
+	case '&':
+		if l.peakChar() == '&'{
+			ch := l.ch
+			l.readChar()
+			tok = token.Token{Type: token.AND, Literal: string(ch)+string(l.ch), Line: currentLine, Column: currentColumn}
+		}
 	case '"':
 		tok.Type = token.STRING
 		tok.Literal = l.readString()

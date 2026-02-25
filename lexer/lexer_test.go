@@ -56,6 +56,8 @@ func TestNextToken(t *testing.T){
 	user.name
 	import "walon"
 	struct
+	||
+	&&
 	`
 	
 	test := []struct{
@@ -184,6 +186,8 @@ func TestNextToken(t *testing.T){
 		{token.IMPORT, "import"},
 		{token.STRING, "walon"},
 		{token.STRUCT, "struct"},
+		{token.OR, "||"},
+		{token.AND, "&&"},
 		{token.EOF, ""},
 	}
 	
