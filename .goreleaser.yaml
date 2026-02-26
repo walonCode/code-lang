@@ -17,7 +17,7 @@ before:
     - go mod tidy
 
 builds:
-  - main: .
+  - main: ./cmd/code-lang/main.go
     binary: code-lang
     env:
       - CGO_ENABLED=0
@@ -35,8 +35,8 @@ builds:
       - -trimpath
     ldflags:
       - -s -w -X github.com/walonCode/code-lang/main.Version={{.Version}}
-      - -X github.com/walonCode/code-lang/main.Version={{.Version}}
-      - -X github.com/walonCode/code-lang/main.Commit={{.Commit}}
+      - -X github.com/walonCode/code-lang/cmd/code-lang/main.Version={{.Version}}
+      - -X github.com/walonCode/code-lang/cmd/code-lang/main.Commit={{.Commit}}
 
 archives:
   - name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
