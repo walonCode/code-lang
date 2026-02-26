@@ -1,16 +1,16 @@
 package evaluator
 
 import (
-	"github.com/walonCode/code-lang/std/arrays"
-	"github.com/walonCode/code-lang/std/fs"
-	"github.com/walonCode/code-lang/std/general"
-	"github.com/walonCode/code-lang/std/hash"
-	"github.com/walonCode/code-lang/std/json"
-	"github.com/walonCode/code-lang/std/math"
-	"github.com/walonCode/code-lang/std/net"
-	"github.com/walonCode/code-lang/std/os"
-	"github.com/walonCode/code-lang/std/strings"
-	"github.com/walonCode/code-lang/std/time"
+	"github.com/walonCode/code-lang/internal/std/arrays"
+	"github.com/walonCode/code-lang/internal/std/fs"
+	"github.com/walonCode/code-lang/internal/std/general"
+	"github.com/walonCode/code-lang/internal/std/hash"
+	"github.com/walonCode/code-lang/internal/std/json"
+	"github.com/walonCode/code-lang/internal/std/math"
+	"github.com/walonCode/code-lang/internal/std/net"
+	"github.com/walonCode/code-lang/internal/std/os"
+	"github.com/walonCode/code-lang/internal/std/strings"
+	"github.com/walonCode/code-lang/internal/std/time"
 )
 
 func init() {

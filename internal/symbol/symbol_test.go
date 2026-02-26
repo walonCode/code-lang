@@ -3,8 +3,8 @@ package symbol
 import (
 	"testing"
 
-	"github.com/walonCode/code-lang/lexer"
-	"github.com/walonCode/code-lang/parser"
+	"github.com/walonCode/code-lang/internal/lexer"
+	"github.com/walonCode/code-lang/internal/parser"
 )
 
 func TestSymbolTable(t *testing.T) {

@@ -3,7 +3,7 @@ package lexer
 import (
 	"testing"
 
-	"github.com/walonCode/code-lang/token"
+	"github.com/walonCode/code-lang/internal/token"
 )
 
 func TestNextToken(t *testing.T){

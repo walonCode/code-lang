@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/walonCode/code-lang/ast"
-	"github.com/walonCode/code-lang/object"
+	"github.com/walonCode/code-lang/internal/ast"
+	"github.com/walonCode/code-lang/internal/object"
 )
 
 type ApplyFunctionFunc func(fn object.Object, args []object.Object, node *ast.CallExpression)object.Object

@@ -3,8 +3,8 @@ package strings
 import (
 	"strings"
 
-	"github.com/walonCode/code-lang/ast"
-	"github.com/walonCode/code-lang/object"
+	"github.com/walonCode/code-lang/internal/ast"
+	"github.com/walonCode/code-lang/internal/object"
 )
 
 func Module() *object.Module {

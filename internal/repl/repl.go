@@ -7,12 +7,12 @@ import (
 	"path/filepath"
 
 	"github.com/chzyer/readline"
-	"github.com/walonCode/code-lang/evaluator"
-	"github.com/walonCode/code-lang/lexer"
-	"github.com/walonCode/code-lang/object"
-	"github.com/walonCode/code-lang/parser"
-	"github.com/walonCode/code-lang/std/general"
-	"github.com/walonCode/code-lang/symbol"
+	"github.com/walonCode/code-lang/internal/evaluator"
+	"github.com/walonCode/code-lang/internal/lexer"
+	"github.com/walonCode/code-lang/internal/object"
+	"github.com/walonCode/code-lang/internal/parser"
+	"github.com/walonCode/code-lang/internal/std/general"
+	"github.com/walonCode/code-lang/internal/symbol"
 )
 
 const PROMPT = ">> "

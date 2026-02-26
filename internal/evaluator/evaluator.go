@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/walonCode/code-lang/ast"
-	"github.com/walonCode/code-lang/lexer"
-	"github.com/walonCode/code-lang/object"
-	"github.com/walonCode/code-lang/parser"
+	"github.com/walonCode/code-lang/internal/ast"
+	"github.com/walonCode/code-lang/internal/lexer"
+	"github.com/walonCode/code-lang/internal/object"
+	"github.com/walonCode/code-lang/internal/parser"
 )
 
 var moduleCache = map[string]*object.Module{}

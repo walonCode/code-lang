@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/walonCode/code-lang/ast"
-	"github.com/walonCode/code-lang/lexer"
-	"github.com/walonCode/code-lang/token"
+	"github.com/walonCode/code-lang/internal/ast"
+	"github.com/walonCode/code-lang/internal/lexer"
+	"github.com/walonCode/code-lang/internal/token"
 )
 
 const (

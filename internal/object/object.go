@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/walonCode/code-lang/ast"
+	"github.com/walonCode/code-lang/internal/ast"
 )
 
 type BuiltinFunction func(node *ast.CallExpression, args ...Object) Object

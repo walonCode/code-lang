@@ -3,7 +3,7 @@ package ast
 import (
 	"testing"
 
-	"github.com/walonCode/code-lang/token"
+	"github.com/walonCode/code-lang/internal/token"
 )
 
 func TestString(t *testing.T) {

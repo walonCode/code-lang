@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/walonCode/code-lang/ast"
-	"github.com/walonCode/code-lang/lexer"
+	"github.com/walonCode/code-lang/internal/ast"
+	"github.com/walonCode/code-lang/internal/lexer"
 )
 
 func TestLetStatements(t *testing.T) {

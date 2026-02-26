@@ -3,7 +3,7 @@ package symbol
 import (
 	"fmt"
 
-	"github.com/walonCode/code-lang/ast"
+	"github.com/walonCode/code-lang/internal/ast"
 )
 
 type Builder struct {

@@ -3,7 +3,7 @@ package lexer
 import (
 	"strings"
 
-	"github.com/walonCode/code-lang/token"
+	"github.com/walonCode/code-lang/internal/token"
 )
 
 type Lexer struct {

@@ -3,7 +3,7 @@ package ast
 import (
 	"strings"
 
-	"github.com/walonCode/code-lang/token"
+	"github.com/walonCode/code-lang/internal/token"
 )
 
 // struct
