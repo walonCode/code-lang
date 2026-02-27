@@ -2,3 +2,5 @@ Todo.md
 *.cl
 TODO.*
 dist/
+lsp
+log.txt
