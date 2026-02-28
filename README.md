@@ -302,7 +302,7 @@ print(typeof([]));   # ARRAY
 | `fs` module (file system access) | 🔜 Planned |
 | REPL Multi-line Support | 🔜 Planned |
 | VSCode Extension (syntax highlighting) | 🚧 WIP |
-| LSP (Language Server Protocol) | ✅ Done |
+| LSP (Language Server Protocol) | 🚧 WIP |
 
 ---
 
