@@ -4,6 +4,8 @@ Code-Lang is a modern, interpreted programming language written in Go. It began 
 
 > [!IMPORTANT]
 > **Status:** Code-Lang is a **passion project** and is currently under active development. While the core language is functional, it is not production-ready. If you intend to use this in a production environment, significant work, security audits, and optimizations are required.
+> 
+> 🚀 **Note:** This project is actively evolving and will soon be moved to the [Walon-Foundation](https://github.com/Walon-Foundation)!
 
 ---
 
@@ -40,6 +42,11 @@ Code-Lang is a modern, interpreted programming language written in Go. It began 
 - **Standard Library:** Go-backed modules for `math`, `strings`, `time`, `hash`, `os`, `json`, and `net`.
 - **REPL:** Interactive shell with persistent history and precise line/column error tracking.
 - **File Execution:** Run scripts with the `.cl` extension.
+- **Language Server Protocol (LSP):** Built-in Language Server providing IDE-like features:
+  - Auto-completion, Hover previews, and live Diagnostics.
+  - Go to Definition / Declaration / Implementation.
+  - Find References, Rename variables, and Document Symbols.
+  - Quickfix Code Actions (e.g., fixing undefined variables).
 
 ---
 
@@ -85,6 +92,24 @@ You can execute a Code-Lang script by passing the filename as an argument:
 ```bash
 go run main.go hello.cl
 ```
+
+### Running the Language Server (LSP)
+
+The project now includes an LSP server executable that provides robust IDE features for Code-Lang! You can build the Language Server using the provided build script:
+
+```bash
+# Build the LSP using the script
+./build_lsp
+
+# Run the LSP (operates over stdin / stdout for editors like VS Code)
+./lsp
+```
+
+### Visual Studio Code Extension
+
+A dedicated VS Code extension is currently in the works to provide syntax highlighting and deep integration with the Code-Lang Language Server! You can find the repository and follow its development here:
+
+👉 [Walon-Foundation/vscode_code-lang](https://github.com/Walon-Foundation/vscode_code-lang)
 
 ---
 
@@ -276,8 +301,8 @@ print(typeof([]));   # ARRAY
 | Struct Methods | 🔜 Planned |
 | `fs` module (file system access) | 🔜 Planned |
 | REPL Multi-line Support | 🔜 Planned |
-| VSCode Extension (syntax highlighting) | 🔜 Planned |
-| LSP (Language Server Protocol) | 🔜 Planned |
+| VSCode Extension (syntax highlighting) | 🚧 WIP |
+| LSP (Language Server Protocol) | ✅ Done |
 
 ---
 
