@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+go build ./cmd/code-lang-lsp/lsp.go
+
+echo "build successful"

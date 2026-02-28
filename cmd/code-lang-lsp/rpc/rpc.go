@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 )
 
 type BaseMessage struct {
@@ -29,8 +30,7 @@ func DecodeMessage(msg []byte)(string, []byte, error){
 		return "",nil, errors.New("invalid json ")
 	}
 
-	contentLengthByte := header[len("Content-Length: "):]
-	contentLength, err := strconv.Atoi(string(contentLengthByte))
+	contentLength, err := parseContentLength(header)
 	if err != nil {
 		return "", nil ,err
 	}
@@ -50,8 +50,7 @@ func Spilt(data []byte, _ bool)(advance int, token []byte, err error){
 		return 0, nil, nil
 	}
 	
-	contentLenghtBytes := header[len("Content-Length: "):]
-	contentLength,err := strconv.Atoi(string(contentLenghtBytes))
+	contentLength,err := parseContentLength(header)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -62,4 +61,16 @@ func Spilt(data []byte, _ bool)(advance int, token []byte, err error){
 	
 	totalLength := len(header) + 4 + contentLength
 	return totalLength, data[:totalLength], nil
+}
+
+func parseContentLength(header []byte) (int, error) {
+	lines := strings.Split(string(header), "\r\n")
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if strings.HasPrefix(strings.ToLower(line), "content-length:") {
+			value := strings.TrimSpace(line[len("Content-Length:"):])
+			return strconv.Atoi(value)
+		}
+	}
+	return 0, errors.New("missing Content-Length header")
 }
